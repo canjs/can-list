@@ -1,8 +1,9 @@
 /* jshint -W079 */
+require('can-event');
+
 var Map = require('can-map');
 var bubble = require('can-map/bubble');
 var mapHelpers = require('can-map/map-helpers');
-var canEvent = require('can-event');
 var canBatch = require('can-event/batch/batch');
 var ObserveInfo = require('can-observe-info');
 
@@ -787,6 +788,7 @@ assign(List.prototype, {
 	 * ```
 	 */
 	forEach: function (cb, thisarg) {
+		var item;
 		for (var i = 0, len = this.attr("length"); i < len; i++) {
 			item = this.attr(i);
 			if (cb.call(thisarg || item, item, i, this) === false) {
@@ -904,7 +906,7 @@ assign(List.prototype, {
 // specify the type
 types.isListLike = function(obj){
 	return obj instanceof List;
-}
+};
 
 // change some map stuff to include list stuff
 var oldType = Map.prototype.__type;
@@ -916,7 +918,7 @@ Map.prototype.__type = function(value, prop){
 		if(cached) {
 			return cached;
 		}
-		var MapConstructor = this.constructor.List || List;
+		
 		return new List(value);
 
 	}
