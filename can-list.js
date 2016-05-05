@@ -13,7 +13,7 @@ var makeArray = require('can-util/js/make-array/make-array');
 var assign = require('can-util/js/assign/assign');
 var types = require('can-util/js/types/types');
 var each = require('can-util/js/each/each');
-
+var types = require("can-util/js/types/types");
 
 
 
@@ -918,7 +918,7 @@ Map.prototype.__type = function(value, prop){
 		if(cached) {
 			return cached;
 		}
-		
+
 		return new List(value);
 
 	}
@@ -935,6 +935,9 @@ Map.setup = function(){
 	}
 };
 
+if(!types.DefaultList) {
+	types.DefaultList = List;
+}
 
 List.prototype.each = List.prototype.forEach;
 Map.List = List;
