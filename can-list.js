@@ -1,6 +1,7 @@
 /* jshint -W079 */
 require('can-event');
 
+var namespace = require('can-util/namespace');
 var Map = require('can-map');
 var bubble = require('can-map/bubble');
 var mapHelpers = require('can-map/map-helpers');
@@ -941,4 +942,4 @@ if(!types.DefaultList) {
 
 List.prototype.each = List.prototype.forEach;
 Map.List = List;
-module.exports = List;
+module.exports = namespace.List = List;
