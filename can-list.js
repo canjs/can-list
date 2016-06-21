@@ -6,7 +6,7 @@ var Map = require('can-map');
 var bubble = require('can-map/bubble');
 var mapHelpers = require('can-map/map-helpers');
 var canBatch = require('can-event/batch/batch');
-var ObserveInfo = require('can-observe-info');
+var Observation = require('can-observation');
 
 var CID = require('can-util/js/cid/cid');
 var isPromise = require('can-util/js/is-promise/is-promise');
@@ -642,7 +642,7 @@ assign(List.prototype, {
 	 * ```
 	 */
 	indexOf: function (item, fromIndex) {
-		ObserveInfo.observe(this, "length");
+		Observation.add(this, "length");
 		for(var i = fromIndex || 0, len = this.length; i < len; i++) {
 			if(this.attr(i) === item) {
 				return i;
@@ -673,7 +673,7 @@ assign(List.prototype, {
 	 * ```
 	 */
 	join: function () {
-		ObserveInfo.observe(this, "length");
+		Observation.add(this, "length");
 		return [].join.apply(this, arguments);
 	},
 
@@ -733,7 +733,7 @@ assign(List.prototype, {
 	 */
 	slice: function () {
 		// tells computes to listen on length for changes.
-		ObserveInfo.observe(this, "length");
+		Observation.add(this, "length");
 		var temp = Array.prototype.slice.apply(this, arguments);
 		return new this.constructor(temp);
 	},
