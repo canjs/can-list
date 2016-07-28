@@ -905,8 +905,9 @@ assign(List.prototype, {
 });
 
 // specify the type
+var oldIsListLike = types.isListLike;
 types.isListLike = function(obj){
-	return obj instanceof List;
+	return obj instanceof List || oldIsListLike.apply(this, arguments);
 };
 
 // change some map stuff to include list stuff
