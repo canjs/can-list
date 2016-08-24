@@ -1,6 +1,7 @@
 var List = require('can-list');
 var QUnit = require('steal-qunit');
 var Observation = require('can-observation');
+require("can-map-define");
 
 QUnit.module('can-list');
 
@@ -358,4 +359,19 @@ test("list is always updated with the last promise passed to replace (#2136)", f
 			resolve([ "B" ]);
 		}, 10 );
 	}));
+});
+
+test("works with can-map-define", function() {
+	var MyList = List.extend({}, {
+		define: {
+			foo: {
+				get: function(){
+					return "bar";
+				}
+			}
+		}
+	});
+
+	var list = new MyList();
+	equal(list.attr("foo"), "bar");
 });

@@ -146,6 +146,11 @@ var List = Map.extend(
 		},
 		___get: function (attr) {
 			if (attr) {
+				var computedAttr = this._computedAttrs[attr];
+				if(computedAttr && computedAttr.compute) {
+					return computedAttr.compute();
+				}
+
 				if (this[attr] && this[attr].isComputed && typeof this.constructor.prototype[attr] === "function" ) {
 					return this[attr]();
 				} else {
