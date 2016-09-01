@@ -767,10 +767,11 @@ assign(List.prototype, {
 	 */
 	concat: function () {
 		var args = [];
+		var MapType = this.constructor.Map;
 		each(makeArray(arguments), function (arg, i) {
-			args[i] = arg instanceof List ? arg.serialize() : arg;
+			args[i] = (arg instanceof Map) && !(arg instanceof MapType) ? arg.serialize() : arg;
 		});
-		return new this.constructor(Array.prototype.concat.apply(this.serialize(), args));
+		return new this.constructor(Array.prototype.concat.apply(makeArray(this), args));
 	},
 
 	/**

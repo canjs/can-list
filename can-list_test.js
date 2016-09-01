@@ -137,6 +137,7 @@ test('always gets right attr even after moving array items', function () {
 	});
 	o.attr('foo', 'led you');
 });
+
 test('Array accessor methods', 11, function () {
 	var l = new List([
 		'a',
@@ -160,7 +161,7 @@ test('Array accessor methods', 11, function () {
 		'c',
 		2,
 		1,
-		0
+		[0]
 	], 'List concatenated properly');
 	l.forEach(function (letter, index) {
 		ok(true, 'Iteration');
@@ -172,12 +173,22 @@ test('Array accessor methods', 11, function () {
 		}
 	});
 });
+
+test('Concated list deepEquals original', function() {
+	var l = new List([
+		{ firstProp: "Some data" },
+		{ secondProp: "Next data" }
+	]),
+	concatenated = l.concat(["Hello", "World"]);
+	
+	deepEqual(l[0], concatenated[0], "They deep equal");
+});
+
 test('splice removes items in IE (#562)', function () {
 	var l = new List(['a']);
 	l.splice(0, 1);
 	ok(!l.attr(0), 'all props are removed');
 });
-
 
 test('reverse triggers add/remove events (#851)', function() {
 	expect(6);
