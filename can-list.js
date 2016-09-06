@@ -14,7 +14,6 @@ var makeArray = require('can-util/js/make-array/make-array');
 var assign = require('can-util/js/assign/assign');
 var types = require('can-util/js/types/types');
 var each = require('can-util/js/each/each');
-var types = require("can-util/js/types/types");
 
 
 
@@ -764,12 +763,27 @@ assign(List.prototype, {
 	 * );
 	 * newList.attr(); // ['Alice', 'Bob', 'Charlie', 'Daniel', 'Eve', {f: 'Francis'}]
 	 * ```
-	 */	
-	concat: function () {
-		var args = [];
-		each(makeArray(arguments), function (arg, i) {
-			args[i] = (arg instanceof Map) ? arg.serialize() : arg;
+	 */
+
+	concat: function() {
+
+		var args = [],
+			MapType = this.constructor.Map;
+
+		each(arguments, function(arg) {
+			if(types.isListLike(arg)) {
+				var arr = makeArray(arg);
+				if(arr && arr.serialize && (arr instanceof MapType)) {
+					args.push.apply(args, new MapType(arr.serialize()));
+				} else {
+					args.push.apply(args, arr);
+				}
+			}
+			else {
+				args.push.apply(args, arg);
+			}
 		});
+
 		return new this.constructor(Array.prototype.concat.apply(makeArray(this), args));
 	},
 

@@ -174,7 +174,7 @@ test('Array accessor methods', 11, function () {
 	});
 });
 
-test('Concated list deepEquals original', function() {
+test('Concated list Equals original', function() {
 	var l = new List([
 		{ firstProp: "Some data" },
 		{ secondProp: "Next data" }
@@ -184,9 +184,9 @@ test('Concated list deepEquals original', function() {
 		{ foo: "Bar" }
 	]);
 	
-	deepEqual(l[0], concatenated[0], "They deep equal");
-	deepEqual(l[1], concatenated[1], "They deep equal");
-	deepEqual(concatenated[2], (concatenated.concat())[2]);
+	ok(l[0] === concatenated[0], "They are Equal");
+	ok(l[1] === concatenated[1], "They are Equal");
+	
 });
 
 test('splice removes items in IE (#562)', function () {
