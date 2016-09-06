@@ -161,7 +161,7 @@ test('Array accessor methods', 11, function () {
 		'c',
 		2,
 		1,
-		[0]
+		0
 	], 'List concatenated properly');
 	l.forEach(function (letter, index) {
 		ok(true, 'Iteration');
@@ -179,9 +179,14 @@ test('Concated list deepEquals original', function() {
 		{ firstProp: "Some data" },
 		{ secondProp: "Next data" }
 	]),
-	concatenated = l.concat(["Hello", "World"]);
+	concatenated = l.concat([
+		{ hello: "World" },
+		{ foo: "Bar" }
+	]);
 	
 	deepEqual(l[0], concatenated[0], "They deep equal");
+	deepEqual(l[1], concatenated[1], "They deep equal");
+	deepEqual(concatenated[2], (concatenated.concat())[2]);
 });
 
 test('splice removes items in IE (#562)', function () {
