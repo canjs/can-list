@@ -1,6 +1,7 @@
 var List = require('can-list');
 var QUnit = require('steal-qunit');
 var Observation = require('can-observation');
+var Map = require('can-map');
 require("can-map-define");
 
 QUnit.module('can-list');
@@ -174,7 +175,7 @@ test('Array accessor methods', 11, function () {
 	});
 });
 
-test('Concated list Equals original', function() {
+test('Concatenated list items Equal original', function() {
 	var l = new List([
 		{ firstProp: "Some data" },
 		{ secondProp: "Next data" }
@@ -183,10 +184,31 @@ test('Concated list Equals original', function() {
 		{ hello: "World" },
 		{ foo: "Bar" }
 	]);
-	
+
 	ok(l[0] === concatenated[0], "They are Equal");
 	ok(l[1] === concatenated[1], "They are Equal");
+
+});
+
+test('Lists with maps concatenate properly', function() {
+	Person = Map.extend();
+	People = List.extend({
+		Map: Person
+	},{});
+	Genius = Person.extend();
+	Animal = Map.extend();
 	
+	var me = new Person({ name: "John" });
+	var animal = new Animal({ name: "Tak" });
+	var genius = new Genius({ name: "Einstein" });
+	var hero = { name: "Ghandi" };
+	
+	var people = new People([]);
+	people = people.concat(me, animal, genius, hero, [1, 2], 3);
+	
+	ok(people.attr('length') === 7, "List length is right");
+	ok(people[0] === me, "Map in list === vars created before concat");
+	ok(people[1] instanceof Person, "Animal got serialized to Person");
 });
 
 test('splice removes items in IE (#562)', function () {

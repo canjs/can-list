@@ -765,25 +765,71 @@ assign(List.prototype, {
 	 * ```
 	 */
 
+	// concat: function () {
+	// 	var args = [];
+	// 	each(makeArray(arguments), function (arg, i) {
+	// 		args[i] = (arg instanceof Map) ? arg.serialize() : arg;
+	// 	});
+	// 	return new this.constructor(Array.prototype.concat.apply(makeArray(this), args));
+	// },
+
+	// concat: function() {
+  //
+	// 	var args = [],
+	// 		MapType = this.constructor.Map;
+  //
+	// 	each(arguments, function(arg) {
+	// 		if(types.isListLike(arg)) {
+	// 			args.push.apply(args, makeArray(arg));
+	// 		}
+	// 		else {
+	// 			args.push(arg);
+	// 		}
+	// 	});
+  //
+	// 	args = args.map(function(arg) {
+	// 		if(arg && arg.serialize && !(arg instanceof MapType)) {
+	// 			return new MapType(arg.serialize());
+	// 		} else {
+	// 			return arg;
+	// 		}
+	// 	});
+  //
+	// 	return new this.constructor(Array.prototype.concat.apply(makeArray(this), args));
+	// },
+
 	concat: function() {
 
 		var args = [],
-			MapType = this.constructor.Map;
-
+			MapType = this.constructor.Map,
+			// Function that serializes the passed arg if
+			// type does not match MapType of `this` list
+			// then adds to args array
+			serializeNonTypes = function(arg) {
+				if(arg && arg.serialize && !(arg instanceof MapType)) {
+					args.push(new MapType(arg.serialize()));
+				} else {
+					args.push(arg);
+				}
+			};
+		
+		// Go through each of the passed `arguments` and
+		// if it is list-like we want to make it a JS array for now
+		// then decide if we want to serialize
 		each(arguments, function(arg) {
 			if(types.isListLike(arg)) {
 				var arr = makeArray(arg);
-				if(arr && arr.serialize && (arr instanceof MapType)) {
-					args.push.apply(args, new MapType(arr.serialize()));
-				} else {
-					args.push.apply(args, arr);
-				}
+				serializeNonTypes(arr);
 			}
 			else {
-				args.push.apply(args, arg);
+				serializeNonTypes(arg);
 			}
 		});
 
+		// We will want to make `this` list into a JS array
+		// as well (We know it should be list-like), then
+		// concat with our passed in args, then pass it to
+		// list constructor to make it back into a list
 		return new this.constructor(Array.prototype.concat.apply(makeArray(this), args));
 	},
 
