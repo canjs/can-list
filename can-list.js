@@ -15,7 +15,6 @@ var makeArray = require('can-util/js/make-array/make-array');
 var assign = require('can-util/js/assign/assign');
 var types = require('can-util/js/types/types');
 var each = require('can-util/js/each/each');
-var types = require("can-util/js/types/types");
 
 
 
@@ -31,6 +30,17 @@ var splice = [].splice,
 		splice.call(obj, 0, 1);
 		return !obj[0];
 	})();
+
+// Function that serializes the passed arg if
+// type does not match MapType of `this` list
+// then adds to args array
+var serializeNonTypes = function(MapType, arg, args) {
+	if(arg && arg.serialize && !(arg instanceof MapType)) {
+		args.push(new MapType(arg.serialize()));
+	} else {
+		args.push(arg);
+	}
+};
 
 /**
  * @add can.List
@@ -770,12 +780,32 @@ assign(List.prototype, {
 	 * newList.attr(); // ['Alice', 'Bob', 'Charlie', 'Daniel', 'Eve', {f: 'Francis'}]
 	 * ```
 	 */
-	concat: function () {
-		var args = [];
-		each(makeArray(arguments), function (arg, i) {
-			args[i] = arg instanceof List ? arg.serialize() : arg;
+	concat: function() {
+		var args = [],
+			MapType = this.constructor.Map;
+		// Go through each of the passed `arguments` and 
+		// see if it is list-like, an array, or something else
+		each(arguments, function(arg) {
+			if(types.isListLike(arg) || Array.isArray(arg)) {
+				// If it is list-like we want convert to a JS array then
+				// pass each item of the array to serializeNonTypes
+				var arr = types.isListLike(arg) ? makeArray(arg) : arg;
+				each(arr, function(innerArg) {
+					serializeNonTypes(MapType, innerArg, args);
+				});
+			}
+			else {
+				// If it is a Map, Object, or some primitive 
+				// just pass arg to serializeNonTypes
+				serializeNonTypes(MapType, arg, args);
+			}
 		});
-		return new this.constructor(Array.prototype.concat.apply(this.serialize(), args));
+
+		// We will want to make `this` list into a JS array
+		// as well (We know it should be list-like), then
+		// concat with our passed in args, then pass it to
+		// list constructor to make it back into a list
+		return new this.constructor(Array.prototype.concat.apply(makeArray(this), args));
 	},
 
 	/**
