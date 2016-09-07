@@ -764,40 +764,6 @@ assign(List.prototype, {
 	 * newList.attr(); // ['Alice', 'Bob', 'Charlie', 'Daniel', 'Eve', {f: 'Francis'}]
 	 * ```
 	 */
-
-	// concat: function () {
-	// 	var args = [];
-	// 	each(makeArray(arguments), function (arg, i) {
-	// 		args[i] = (arg instanceof Map) ? arg.serialize() : arg;
-	// 	});
-	// 	return new this.constructor(Array.prototype.concat.apply(makeArray(this), args));
-	// },
-
-	// concat: function() {
-  //
-	// 	var args = [],
-	// 		MapType = this.constructor.Map;
-  //
-	// 	each(arguments, function(arg) {
-	// 		if(types.isListLike(arg)) {
-	// 			args.push.apply(args, makeArray(arg));
-	// 		}
-	// 		else {
-	// 			args.push(arg);
-	// 		}
-	// 	});
-  //
-	// 	args = args.map(function(arg) {
-	// 		if(arg && arg.serialize && !(arg instanceof MapType)) {
-	// 			return new MapType(arg.serialize());
-	// 		} else {
-	// 			return arg;
-	// 		}
-	// 	});
-  //
-	// 	return new this.constructor(Array.prototype.concat.apply(makeArray(this), args));
-	// },
-
 	concat: function() {
 
 		var args = [],
@@ -813,15 +779,20 @@ assign(List.prototype, {
 				}
 			};
 		
-		// Go through each of the passed `arguments` and
-		// if it is list-like we want to make it a JS array for now
-		// then decide if we want to serialize
+		// Go through each of the passed `arguments` and 
+		// see if it is list-like, an array, or something else
 		each(arguments, function(arg) {
-			if(types.isListLike(arg)) {
-				var arr = makeArray(arg);
-				serializeNonTypes(arr);
+			if(types.isListLike(arg) || Array.isArray(arg)) {
+				// If it is list-like we want convert to a JS array then
+				// pass each item of the array to serializeNonTypes
+				var arr = types.isListLike(arg) ? makeArray(arg) : arg;
+				each(arr, function(innerArg) {
+					serializeNonTypes(innerArg);
+				});
 			}
 			else {
+				// If it is a Map, Object, or some primitive 
+				// just pass arg to serializeNonTypes
 				serializeNonTypes(arg);
 			}
 		});

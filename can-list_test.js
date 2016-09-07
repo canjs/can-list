@@ -191,12 +191,12 @@ test('Concatenated list items Equal original', function() {
 });
 
 test('Lists with maps concatenate properly', function() {
-	Person = Map.extend();
-	People = List.extend({
+	var Person = Map.extend();
+	var People = List.extend({
 		Map: Person
 	},{});
-	Genius = Person.extend();
-	Animal = Map.extend();
+	var Genius = Person.extend();
+	var Animal = Map.extend();
 	
 	var me = new Person({ name: "John" });
 	var animal = new Animal({ name: "Tak" });
@@ -204,9 +204,14 @@ test('Lists with maps concatenate properly', function() {
 	var hero = { name: "Ghandi" };
 	
 	var people = new People([]);
-	people = people.concat(me, animal, genius, hero, [1, 2], 3);
+	var specialPeople = new People([
+		genius,
+		hero
+	]);
 	
-	ok(people.attr('length') === 7, "List length is right");
+	people = people.concat([me, animal, specialPeople], specialPeople, [1, 2], 3);
+	
+	ok(people.attr('length') === 8, "List length is right");
 	ok(people[0] === me, "Map in list === vars created before concat");
 	ok(people[1] instanceof Person, "Animal got serialized to Person");
 });
