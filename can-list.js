@@ -30,6 +30,17 @@ var splice = [].splice,
 		return !obj[0];
 	})();
 
+// Function that serializes the passed arg if
+// type does not match MapType of `this` list
+// then adds to args array
+var serializeNonTypes = function(MapType, arg, args) {
+	if(arg && arg.serialize && !(arg instanceof MapType)) {
+		args.push(new MapType(arg.serialize()));
+	} else {
+		args.push(arg);
+	}
+};
+
 /**
  * @add can.List
  */
@@ -204,16 +215,6 @@ var List = Map.extend(
 		 */
 		serialize: function () {
 			return mapHelpers.serialize(this, 'serialize', []);
-		},
-		// Function that serializes the passed arg if
-		// type does not match MapType of `this` list
-		// then adds to args array
-		serializeNonTypes: function(MapType, arg, args) {
-			if(arg && arg.serialize && !(arg instanceof MapType)) {
-				args.push(new MapType(arg.serialize()));
-			} else {
-				args.push(arg);
-			}
 		},
 		/**
 		 * @function can.List.prototype.each each
@@ -776,7 +777,6 @@ assign(List.prototype, {
 	 */
 	concat: function() {
 		var args = [],
-			serializeNonTypes = this.serializeNonTypes,
 			MapType = this.constructor.Map;
 		// Go through each of the passed `arguments` and 
 		// see if it is list-like, an array, or something else
