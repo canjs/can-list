@@ -6,6 +6,7 @@ var Map = require('can-map');
 var bubble = require('can-map/bubble');
 var mapHelpers = require('can-map/map-helpers');
 var canBatch = require('can-event/batch/batch');
+var canEvent = require('can-event');
 var Observation = require('can-observation');
 
 var CID = require('can-util/js/cid/cid');
@@ -132,13 +133,13 @@ var List = Map.extend(
 			if (!~(""+attr).indexOf('.') && !isNaN(index)) {
 
 				if (how === 'add') {
-					canBatch.trigger.call(this, how, [newVal, index]);
-					canBatch.trigger.call(this, 'length', [this.length]);
+					canEvent.dispatch.call(this, how, [newVal, index]);
+					canEvent.dispatch.call(this, 'length', [this.length]);
 				} else if (how === 'remove') {
-					canBatch.trigger.call(this, how, [oldVal, index]);
-					canBatch.trigger.call(this, 'length', [this.length]);
+					canEvent.dispatch.call(this, how, [oldVal, index]);
+					canEvent.dispatch.call(this, 'length', [this.length]);
 				} else {
-					canBatch.trigger.call(this, how, [newVal, index]);
+					canEvent.dispatch.call(this, how, [newVal, index]);
 				}
 
 			}
@@ -167,12 +168,16 @@ var List = Map.extend(
 
 			// Check to see if we're doing a .attr() on an out of
 			// bounds index property.
-			if (typeof prop === "number" &&
-				prop > this.length - 1) {
-				var newArr = new Array((prop + 1) - this.length);
-				newArr[newArr.length-1] = value;
-				this.push.apply(this, newArr);
-				return newArr;
+			if (typeof prop === "number") {
+				if( prop > this.length - 1 ) {
+					var newArr = new Array((prop + 1) - this.length);
+					newArr[newArr.length-1] = value;
+					this.push.apply(this, newArr);
+					return newArr;
+				} else {
+					this.splice(prop,1,value);
+					return this;
+				}
 			}
 
 			return Map.prototype.__set.call(this, ""+prop, value, current);
