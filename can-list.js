@@ -205,6 +205,16 @@ var List = Map.extend(
 		serialize: function () {
 			return mapHelpers.serialize(this, 'serialize', []);
 		},
+		// Function that serializes the passed arg if
+		// type does not match MapType of `this` list
+		// then adds to args array
+		serializeNonTypes: function(MapType, arg, args) {
+			if(arg && arg.serialize && !(arg instanceof MapType)) {
+				args.push(new MapType(arg.serialize()));
+			} else {
+				args.push(arg);
+			}
+		},
 		/**
 		 * @function can.List.prototype.each each
 		 * @description Call a function on each element of a List.
@@ -765,20 +775,9 @@ assign(List.prototype, {
 	 * ```
 	 */
 	concat: function() {
-
 		var args = [],
-			MapType = this.constructor.Map,
-			// Function that serializes the passed arg if
-			// type does not match MapType of `this` list
-			// then adds to args array
-			serializeNonTypes = function(arg) {
-				if(arg && arg.serialize && !(arg instanceof MapType)) {
-					args.push(new MapType(arg.serialize()));
-				} else {
-					args.push(arg);
-				}
-			};
-		
+			serializeNonTypes = this.serializeNonTypes,
+			MapType = this.constructor.Map;
 		// Go through each of the passed `arguments` and 
 		// see if it is list-like, an array, or something else
 		each(arguments, function(arg) {
@@ -787,13 +786,13 @@ assign(List.prototype, {
 				// pass each item of the array to serializeNonTypes
 				var arr = types.isListLike(arg) ? makeArray(arg) : arg;
 				each(arr, function(innerArg) {
-					serializeNonTypes(innerArg);
+					serializeNonTypes(MapType, innerArg, args);
 				});
 			}
 			else {
 				// If it is a Map, Object, or some primitive 
 				// just pass arg to serializeNonTypes
-				serializeNonTypes(arg);
+				serializeNonTypes(MapType, arg, args);
 			}
 		});
 
