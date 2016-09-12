@@ -799,7 +799,7 @@ assign(List.prototype, {
 		var item;
 		for (var i = 0, len = this.attr("length"); i < len; i++) {
 			item = this.attr(i);
-			if (typeof item !== "undefined" && cb.call(thisarg || item, item, i, this) === false) {
+			if (item !== undefined && cb.call(thisarg || item, item, i, this) === false) {
 				break;
 			}
 		}
