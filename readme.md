@@ -220,7 +220,8 @@ list.each(function(elem){
   the function to call for each element
   The value and index of each element will be passed as the first and second
   arguments, respectively, to the callback. If the callback returns false,
-  the loop will stop.
+  the loop will stop. The callback is not invoked for List elements that were 
+  never initialized.
   
 
 - __returns__ <code>{}</code>:

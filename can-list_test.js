@@ -418,3 +418,25 @@ test("works with can-map-define", function() {
 	var list = new MyList();
 	equal(list.attr("foo"), "bar");
 });
+
+test('forEach callback', function () {
+	var list = new List([]),
+		counter = 0;
+	list.attr(9, 'foo');
+
+	list.forEach(function (element, index, list) {
+		counter++;
+	});
+	equal(counter, 1, 'Should not be invoked for uninitialized attr keys');
+});
+
+test('each callback', function () {
+	var list = new List([]),
+		counter = 0;
+	list.attr(9, 'foo');
+
+	list.each(function (item, index) {
+		counter++;
+	});
+	equal(counter, 1, 'Should not be invoked for uninitialized attr keys');
+});

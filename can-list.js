@@ -226,27 +226,28 @@ var List = Map.extend(
 		 * @description Call a function on each element of a List.
 		 * @signature `list.each( callback(item, index) )`
 		 *
-		 * `each` iterates through the Map, calling a function
+		 * `each` iterates through the List, calling a function
 		 * for each element.
 		 *
 		 * @param {function(*, Number)} callback the function to call for each element
 		 * The value and index of each element will be passed as the first and second
 		 * arguments, respectively, to the callback. If the callback returns false,
-		 * the loop will stop.
+		 * the loop will stop. The callback is not invoked for List elements that were 
+		 * never initialized.
 		 *
 		 * @return {can.List} this List, for chaining
 		 *
 		 * @body
 		 * ```
 		 * var i = 0;
-		 * new can.Map([1, 10, 100]).each(function(element, index) {
+		 * new can.List([1, 10, 100]).each(function(element, index) {
 		 *     i += element;
 		 * });
 		 *
 		 * i; // 111
 		 *
 		 * i = 0;
-		 * new can.Map([1, 10, 100]).each(function(element, index) {
+		 * new can.List([1, 10, 100]).each(function(element, index) {
 		 *     i += element;
 		 *     if(index >= 1) {
 		 *         return false;
@@ -814,7 +815,8 @@ assign(List.prototype, {
 	 * @signature `list.forEach(callback[, thisArg])`
 	 * @param {function(element, index, list)} callback a function to call with each element of the List
 	 * The three parameters that _callback_ gets passed are _element_, the element at _index_, _index_ the
-	 * current element of the list, and _list_ the List the elements are coming from.
+	 * current element of the list, and _list_ the List the elements are coming from. _callback_ is 
+	 * not invoked for List elements that were never initialized.
 	 * @param {Object} [thisArg] the object to use as `this` inside the callback
 	 *
 	 * @body
@@ -832,7 +834,7 @@ assign(List.prototype, {
 		var item;
 		for (var i = 0, len = this.attr("length"); i < len; i++) {
 			item = this.attr(i);
-			if (cb.call(thisarg || item, item, i, this) === false) {
+			if (item !== undefined && cb.call(thisarg || item, item, i, this) === false) {
 				break;
 			}
 		}
