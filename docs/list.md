@@ -4,6 +4,7 @@
 @test can/list/test.html
 @parent can-legacy
 @release 2.0
+@package ../package.json
 
 @group can-list.prototype 0 Prototype
 @group can-list.static 1 Static
@@ -22,7 +23,7 @@ Create an observable array-like object.
 
 @signature `new List(deferred)`
 
-@param {can.Deferred} deferred A deferred that resolves to an 
+@param {can.Deferred} deferred A deferred that resolves to an
 array.  When the deferred resolves, its values will be added to the list.
 
 @return {can-list} An initially empty `List`.  
@@ -32,7 +33,7 @@ array.  When the deferred resolves, its values will be added to the list.
 
 ## Use
 
-`List` is used to observe changes to an Array.  `List` extends `[can-map]`, so all the 
+`List` is used to observe changes to an Array.  `List` extends `[can-map]`, so all the
 ways that you're used to working with Maps also work here.
 
 Use [can-list::attr attr] to read and write properties of a list:
@@ -40,9 +41,9 @@ Use [can-list::attr attr] to read and write properties of a list:
     var hobbies = new List(["JS","Party Rocking"])
     hobbies.attr(0)        //-> "JS"
     hobbies.attr("length") //-> 2
-    
+
     hobbies.attr(0,"JavaScript")
-    
+
     hobbies.attr()         //-> ["JavaScript","Party Rocking"]
 
 Just as you shouldn't set properties of an Map directly, you shouldn't change elements
@@ -93,11 +94,11 @@ var list = new List(['Alice', 'Bob', 'Eve']);
 list.bind('change', function() { console.log('An element changed.'); });
 list.bind('set', function() { console.log('An element was set.'); });
 list.bind('add', function() { console.log('An element was added.'); });
-list.bind('remove', function() { 
-  console.log('An element was removed.'); 
+list.bind('remove', function() {
+  console.log('An element was removed.');
 });
-list.bind('length', function() { 
-  console.log('The length of the list changed.'); 
+list.bind('length', function() {
+  console.log('The length of the list changed.');
 });
 
 list.attr(0, 'Alexis'); // 'An element changed.'
