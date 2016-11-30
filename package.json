@@ -38,7 +38,7 @@
   "dependencies": {
     "can-construct": "^3.0.0",
     "can-event": "^3.0.1",
-    "can-map": "^3.0.1",
+    "can-map": "^3.0.3",
     "can-observation": "^3.0.1",
     "can-util": "^3.0.1"
   },
