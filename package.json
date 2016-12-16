@@ -36,15 +36,18 @@
     "npmAlgorithm": "flat"
   },
   "dependencies": {
+    "can-cid": "^1.0.0",
     "can-construct": "^3.0.0",
     "can-event": "^3.0.1",
     "can-map": "^3.0.1",
+    "can-namespace": "1.0.0",
     "can-observation": "^3.0.1",
-    "can-util": "^3.0.1"
+    "can-types": "^1.0.1",
+    "can-util": "^3.1.1"
   },
   "devDependencies": {
     "bit-docs": "0.0.7",
-    "can-map-define": "^3.0.0-pre.2",
+    "can-map-define": "^3.0.2",
     "done-serve": "^0.2.0",
     "donejs-cli": "^0.9.5",
     "generator-donejs": "^0.9.0",

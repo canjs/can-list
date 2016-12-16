@@ -1,7 +1,7 @@
 /* jshint -W079 */
 require('can-event');
 
-var namespace = require('can-util/namespace');
+var namespace = require('can-namespace');
 var Map = require('can-map');
 var bubble = require('can-map/bubble');
 var mapHelpers = require('can-map/map-helpers');
@@ -9,11 +9,11 @@ var canBatch = require('can-event/batch/batch');
 var canEvent = require('can-event');
 var Observation = require('can-observation');
 
-var CID = require('can-util/js/cid/cid');
+var CID = require('can-cid');
 var isPromise = require('can-util/js/is-promise/is-promise');
 var makeArray = require('can-util/js/make-array/make-array');
 var assign = require('can-util/js/assign/assign');
-var types = require('can-util/js/types/types');
+var types = require('can-types');
 var each = require('can-util/js/each/each');
 
 
