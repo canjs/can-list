@@ -2,7 +2,6 @@ var List = require('can-list');
 var QUnit = require('steal-qunit');
 var Observation = require('can-observation');
 var Map = require('can-map');
-require("can-map-define");
 
 QUnit.module('can-list');
 
@@ -197,20 +196,20 @@ test('Lists with maps concatenate properly', function() {
 	},{});
 	var Genius = Person.extend();
 	var Animal = Map.extend();
-	
+
 	var me = new Person({ name: "John" });
 	var animal = new Animal({ name: "Tak" });
 	var genius = new Genius({ name: "Einstein" });
 	var hero = { name: "Ghandi" };
-	
+
 	var people = new People([]);
 	var specialPeople = new People([
 		genius,
 		hero
 	]);
-	
+
 	people = people.concat([me, animal, specialPeople], specialPeople, [1, 2], 3);
-	
+
 	ok(people.attr('length') === 8, "List length is right");
 	ok(people[0] === me, "Map in list === vars created before concat");
 	ok(people[1] instanceof Person, "Animal got serialized to Person");
@@ -402,21 +401,6 @@ test("list is always updated with the last promise passed to replace (#2136)", f
 			resolve([ "B" ]);
 		}, 10 );
 	}));
-});
-
-test("works with can-map-define", function() {
-	var MyList = List.extend({}, {
-		define: {
-			foo: {
-				get: function(){
-					return "bar";
-				}
-			}
-		}
-	});
-
-	var list = new MyList();
-	equal(list.attr("foo"), "bar");
 });
 
 test('forEach callback', function () {
