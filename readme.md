@@ -1,5 +1,7 @@
 # can-list
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/canjs/can-list.svg)](https://greenkeeper.io/)
+
 [![Build Status](https://travis-ci.org//can-list.png?branch=master)](https://travis-ci.org//can-list)
 
 
