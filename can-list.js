@@ -927,7 +927,7 @@ assign(List.prototype, {
 			self = this,
 			filtered;
 		this.each(function(item, index, list){
-			filtered = callback.call( thisArg | self, item, index, self);
+			filtered = callback.call( thisArg || self, item, index, self);
 			if(filtered){
 				filteredList.push(item);
 			}
@@ -938,7 +938,7 @@ assign(List.prototype, {
 		var filteredList = new List(),
 			self = this;
 		this.each(function(item, index, list){
-			var mapped = callback.call( thisArg | self, item, index, self);
+			var mapped = callback.call( thisArg || self, item, index, self);
 			filteredList.push(mapped);
 
 		});
