@@ -39,7 +39,7 @@
     "can-cid": "^1.0.0",
     "can-construct": "^3.0.0",
     "can-event": "^3.0.1",
-    "can-map": "^3.0.7-pre.1",
+    "can-map": "^3.1.0-pre.2",
     "can-namespace": "1.0.0",
     "can-observation": "^3.2.0-pre.3",
     "can-types": "^1.0.1",
