@@ -15,8 +15,10 @@ var makeArray = require('can-util/js/make-array/make-array');
 var assign = require('can-util/js/assign/assign');
 var types = require('can-types');
 var each = require('can-util/js/each/each');
+var canReflect = require('can-reflect');
+var canSymbol = require('can-symbol');
 
-
+var setValueSymbol = canSymbol.for("can.setValue");
 
 // Helpers for `observable` lists.
 var splice = [].splice,
@@ -159,7 +161,7 @@ var List = Map.extend(
 			if (attr) {
 				var computedAttr = this._computedAttrs[attr];
 				if(computedAttr && computedAttr.compute) {
-					return computedAttr.compute();
+					return canReflect.getValue(computedAttr.compute);
 				}
 
 				if (this[attr] && this[attr].isComputed && typeof this.constructor.prototype[attr] === "function" ) {
@@ -394,9 +396,18 @@ var List = Map.extend(
 				var curVal = this[prop],
 					newVal = items[prop];
 
-				if ( types.isMapLike(curVal) && mapHelpers.canMakeObserve(newVal)) {
-					curVal.attr(newVal, remove);
-					//changed from a coercion to an explicit
+				if ( canReflect.isMapLike(curVal) && mapHelpers.canMakeObserve(newVal)) {
+					if (setValueSymbol in curVal) {
+						curVal[setValueSymbol](newVal, remove);
+					} else {
+						canReflect.eachKey(curVal, function(val, key) {
+							if (newVal[key]) {
+								canReflect.setKeyValue(curVal, key, val);
+							} else if (remove) {
+								canReflect.deleteKeyValue(curVal, key);
+							}
+						});
+					}
 				} else if (curVal !== newVal) {
 					this._set(prop+"", newVal);
 				} else {
@@ -982,6 +993,19 @@ Map.setup = function(){
 if(!types.DefaultList) {
 	types.DefaultList = List;
 }
+
+// Setup other symbols
+List.prototype[canSymbol.for("can.isListLike")] = true;
+List.prototype[canSymbol.for("can.getKeyValue")] = List.prototype._get;
+List.prototype[canSymbol.for("can.setKeyValue")] = List.prototype._set;
+List.prototype[canSymbol.for("can.deleteKeyValue")] = List.prototype._remove;
+// @@can.keyHasDependencies and @@can.getKeyDependencies same as can-map
+List.prototype[canSymbol.for("can.onKeysAdded")] = function(handler) {
+	this[canSymbol.for("can.onKeyValue")]("add", handler);
+};
+List.prototype[canSymbol.for("can.onKeysRemoved")] = function(handler) {
+	this[canSymbol.for("can.onKeyValue")]("remove", handler);
+};
 
 List.prototype.each = List.prototype.forEach;
 Map.List = List;

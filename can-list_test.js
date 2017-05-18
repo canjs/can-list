@@ -2,6 +2,8 @@ var List = require('can-list');
 var QUnit = require('steal-qunit');
 var Observation = require('can-observation');
 var Map = require('can-map');
+var canReflect = require('can-reflect');
+var canSymbol = require('can-symbol');
 
 QUnit.module('can-list');
 
@@ -423,4 +425,85 @@ test('each callback', function () {
 		counter++;
 	});
 	equal(counter, 1, 'Should not be invoked for uninitialized attr keys');
+});
+
+test("works with can-reflect", 11, function(){
+	var a = new Map({ foo: 4 });
+	var b = new List([ "foo", "bar" ]);
+
+	QUnit.equal( canReflect.getKeyValue(b, "0"), "foo", "unbound value");
+
+	var handler = function(newValue){
+		QUnit.equal(newValue, "quux", "observed new value");
+	};
+	QUnit.ok(!canReflect.isValueLike(b), "isValueLike is false");
+	QUnit.ok(canReflect.isMapLike(b), "isMapLike is true");
+	QUnit.ok(canReflect.isListLike(b), "isListLike is false");
+
+	QUnit.ok( !canReflect.keyHasDependencies(b, "length"), "keyHasDependencies -- false");
+
+	b._computedAttrs["length"] = {
+		compute: new Observation(function() {
+			return a.attr("foo");
+		}, null)
+	};
+	b._computedAttrs["length"].compute.start();
+	QUnit.ok( canReflect.keyHasDependencies(b, "length"), "keyHasDependencies -- true");
+
+	canReflect.onKeysAdded(b, handler);
+	canReflect.onKeysRemoved(b, handler);
+	QUnit.ok(b.__bindEvents.add, "add handler added");
+	QUnit.ok(b.__bindEvents.remove, "remove handler added");
+
+	b.push("quux");
+
+	QUnit.equal( canReflect.getKeyValue(b, "length"), "4", "bound value");
+	// sanity checks to ensure that handler doesn't get called again.
+	b.pop();
+
+});
+
+QUnit.test("can-reflect setKeyValue", function(){
+	var a = new Map({ "a": "b" });
+
+	canReflect.setKeyValue(a, "a", "c");
+	QUnit.equal(a.attr("a"), "c", "setKeyValue");
+});
+
+QUnit.test("can-reflect getKeyDependencies", function() { 
+	var a = new Map({ foo: 4 });
+	var b = new List([ "foo", "bar" ]);
+
+
+	ok(!canReflect.getKeyDependencies(b, "length"), "No dependencies before binding");
+
+	b._computedAttrs["length"] = {
+		compute: new Observation(function() {
+			return a.attr("foo");
+		}, null)
+	};
+	b._computedAttrs["length"].compute.start();
+
+	ok(canReflect.getKeyDependencies(b, "length"), "dependencies exist");
+	ok(canReflect.getKeyDependencies(b, "length").keyDependencies.has(a), "dependencies returned");
+
+});
+
+QUnit.test("registered symbols", function() { 
+	var a = new Map({ "a": "a" });
+
+	ok(a[canSymbol.for("can.isMapLike")], "can.isMapLike");
+	equal(a[canSymbol.for("can.getKeyValue")]("a"), "a", "can.getKeyValue");
+	a[canSymbol.for("can.setKeyValue")]("a", "b");
+	equal(a.attr("a"), "b", "can.setKeyValue");
+
+	function handler(val) {
+		equal(val, "c", "can.onKeyValue");
+	}
+
+	a[canSymbol.for("can.onKeyValue")]("a", handler);
+	a.attr("a", "c");
+
+	a[canSymbol.for("can.offKeyValue")]("a", handler);
+	a.attr("a", "d"); // doesn't trigger handler
 });
