@@ -442,12 +442,12 @@ test("works with can-reflect", 11, function(){
 
 	QUnit.ok( !canReflect.keyHasDependencies(b, "length"), "keyHasDependencies -- false");
 
-	b._computedAttrs["length"] = {
+	b._computedAttrs["length"] = {  // jshint ignore:line
 		compute: new Observation(function() {
 			return a.attr("foo");
 		}, null)
 	};
-	b._computedAttrs["length"].compute.start();
+	b._computedAttrs["length"].compute.start();  // jshint ignore:line
 	QUnit.ok( canReflect.keyHasDependencies(b, "length"), "keyHasDependencies -- true");
 
 	canReflect.onKeysAdded(b, handler);
@@ -477,12 +477,12 @@ QUnit.test("can-reflect getKeyDependencies", function() {
 
 	ok(!canReflect.getKeyDependencies(b, "length"), "No dependencies before binding");
 
-	b._computedAttrs["length"] = {
+	b._computedAttrs["length"] = { // jshint ignore:line
 		compute: new Observation(function() {
 			return a.attr("foo");
 		}, null)
 	};
-	b._computedAttrs["length"].compute.start();
+	b._computedAttrs["length"].compute.start(); // jshint ignore:line
 
 	ok(canReflect.getKeyDependencies(b, "length"), "dependencies exist");
 	ok(canReflect.getKeyDependencies(b, "length").keyDependencies.has(a), "dependencies returned");
