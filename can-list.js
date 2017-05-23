@@ -165,7 +165,7 @@ var List = Map.extend(
 				}
 
 				if (this[attr] && this[attr].isComputed && typeof this.constructor.prototype[attr] === "function" ) {
-					return this[attr]();
+					return canReflect.getValue(this[attr]);
 				} else {
 					return this[attr];
 				}
