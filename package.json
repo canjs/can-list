@@ -40,7 +40,7 @@
     "can-compute": "^3.1.0-pre.6",
     "can-construct": "^3.0.0",
     "can-event": "^3.3.0",
-    "can-map": "^3.1.0-pre.6",
+    "can-map": "^3.1.0-pre.7",
     "can-namespace": "1.0.0",
     "can-observation": "^3.2.0-pre.9",
     "can-reflect": "0.0.3",
