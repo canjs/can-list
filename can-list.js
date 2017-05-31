@@ -999,7 +999,9 @@ List.prototype[canSymbol.for("can.isListLike")] = true;
 List.prototype[canSymbol.for("can.getKeyValue")] = List.prototype._get;
 List.prototype[canSymbol.for("can.setKeyValue")] = List.prototype._set;
 List.prototype[canSymbol.for("can.getValue")] = List.prototype._getAttrs;
-List.prototype[canSymbol.for("can.setValue")] = List.prototype._setAttrs;
+List.prototype[setValueSymbol] = function(newVal) {
+	return this._setAttrs(newVal, canReflect.isListLike(newVal));
+};
 List.prototype[canSymbol.for("can.deleteKeyValue")] = List.prototype._remove;
 // @@can.keyHasDependencies and @@can.getKeyDependencies same as can-map
 List.prototype[canSymbol.for("can.onKeysAdded")] = function(handler) {
