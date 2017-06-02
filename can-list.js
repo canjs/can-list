@@ -1010,6 +1010,11 @@ List.prototype[canSymbol.for("can.onKeysAdded")] = function(handler) {
 List.prototype[canSymbol.for("can.onKeysRemoved")] = function(handler) {
 	this[canSymbol.for("can.onKeyValue")]("remove", handler);
 };
+List.prototype[canSymbol.for("can.getOwnEnumerableKeys")] = function() {
+	return Object.keys(this._data || {}).concat(this.map(function(val, index) {
+		return index;
+	}));
+};
 
 List.prototype.each = List.prototype.forEach;
 Map.List = List;
