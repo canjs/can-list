@@ -427,6 +427,32 @@ test('each callback', function () {
 	equal(counter, 1, 'Should not be invoked for uninitialized attr keys');
 });
 
+test('filter with context', function(){
+	var l = new List([{id: 1}]);
+	var context = {};
+	var contextWasCorrect = false;
+
+	l.filter(function(){
+		contextWasCorrect = (this === context);
+		return true;
+	}, context);
+
+	equal(contextWasCorrect, true, "context was correctly passed");
+});
+
+test('map with context', function(){
+	var l = new List([{id: 1}]);
+	var context = {};
+	var contextWasCorrect = false;
+
+	l.map(function(){
+		contextWasCorrect = (this === context);
+		return true;
+	}, context);
+
+	equal(contextWasCorrect, true, "context was correctly passed");
+});
+
 test("works with can-reflect", 11, function(){
 	var a = new Map({ foo: 4 });
 	var b = new List([ "foo", "bar" ]);
