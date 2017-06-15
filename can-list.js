@@ -798,10 +798,10 @@ assign(List.prototype, {
 		// Go through each of the passed `arguments` and 
 		// see if it is list-like, an array, or something else
 		each(arguments, function(arg) {
-			if(types.isListLike(arg) || Array.isArray(arg)) {
+			if((canReflect.isObservableLike(arg) && canReflect.isListLike(arg)) || Array.isArray(arg)) {
 				// If it is list-like we want convert to a JS array then
 				// pass each item of the array to serializeNonTypes
-				var arr = types.isListLike(arg) ? makeArray(arg) : arg;
+				var arr = (canReflect.isObservableLike(arg) && canReflect.isListLike(arg)) ? makeArray(arg) : arg;
 				each(arr, function(innerArg) {
 					serializeNonTypes(MapType, innerArg, args);
 				});
@@ -956,12 +956,6 @@ assign(List.prototype, {
 		return filteredList;
 	}
 });
-
-// specify the type
-var oldIsListLike = types.isListLike;
-types.isListLike = function(obj){
-	return obj instanceof List || oldIsListLike.apply(this, arguments);
-};
 
 // change some map stuff to include list stuff
 var oldType = Map.prototype.__type;
