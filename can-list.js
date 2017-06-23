@@ -15,8 +15,10 @@ var makeArray = require('can-util/js/make-array/make-array');
 var assign = require('can-util/js/assign/assign');
 var types = require('can-types');
 var each = require('can-util/js/each/each');
+var canReflect = require('can-reflect');
+var canSymbol = require('can-symbol');
 
-
+var setValueSymbol = canSymbol.for("can.setValue");
 
 // Helpers for `observable` lists.
 var splice = [].splice,
@@ -159,11 +161,11 @@ var List = Map.extend(
 			if (attr) {
 				var computedAttr = this._computedAttrs[attr];
 				if(computedAttr && computedAttr.compute) {
-					return computedAttr.compute();
+					return canReflect.getValue(computedAttr.compute);
 				}
 
 				if (this[attr] && this[attr].isComputed && typeof this.constructor.prototype[attr] === "function" ) {
-					return this[attr]();
+					return canReflect.getValue(this[attr]);
 				} else {
 					return this[attr];
 				}
@@ -394,9 +396,18 @@ var List = Map.extend(
 				var curVal = this[prop],
 					newVal = items[prop];
 
-				if ( types.isMapLike(curVal) && mapHelpers.canMakeObserve(newVal)) {
-					curVal.attr(newVal, remove);
-					//changed from a coercion to an explicit
+				if ( canReflect.isMapLike(curVal) && mapHelpers.canMakeObserve(newVal)) {
+					if (setValueSymbol in curVal) {
+						curVal[setValueSymbol](newVal, remove);
+					} else {
+						canReflect.eachKey(curVal, function(val, key) {
+							if (newVal[key]) {
+								canReflect.setKeyValue(curVal, key, val);
+							} else if (remove) {
+								canReflect.deleteKeyValue(curVal, key);
+							}
+						});
+					}
 				} else if (curVal !== newVal) {
 					this._set(prop+"", newVal);
 				} else {
@@ -787,10 +798,10 @@ assign(List.prototype, {
 		// Go through each of the passed `arguments` and 
 		// see if it is list-like, an array, or something else
 		each(arguments, function(arg) {
-			if(types.isListLike(arg) || Array.isArray(arg)) {
+			if((canReflect.isObservableLike(arg) && canReflect.isListLike(arg)) || Array.isArray(arg)) {
 				// If it is list-like we want convert to a JS array then
 				// pass each item of the array to serializeNonTypes
-				var arr = types.isListLike(arg) ? makeArray(arg) : arg;
+				var arr = (canReflect.isObservableLike(arg) && canReflect.isListLike(arg)) ? makeArray(arg) : arg;
 				each(arr, function(innerArg) {
 					serializeNonTypes(MapType, innerArg, args);
 				});
@@ -946,12 +957,6 @@ assign(List.prototype, {
 	}
 });
 
-// specify the type
-var oldIsListLike = types.isListLike;
-types.isListLike = function(obj){
-	return obj instanceof List || oldIsListLike.apply(this, arguments);
-};
-
 // change some map stuff to include list stuff
 var oldType = Map.prototype.__type;
 Map.prototype.__type = function(value, prop){
@@ -982,6 +987,28 @@ Map.setup = function(){
 if(!types.DefaultList) {
 	types.DefaultList = List;
 }
+
+// Setup other symbols
+List.prototype[canSymbol.for("can.isListLike")] = true;
+List.prototype[canSymbol.for("can.getKeyValue")] = List.prototype._get;
+List.prototype[canSymbol.for("can.setKeyValue")] = List.prototype._set;
+List.prototype[canSymbol.for("can.getValue")] = List.prototype._getAttrs;
+List.prototype[setValueSymbol] = function(newVal) {
+	return this._setAttrs(newVal, canReflect.isListLike(newVal));
+};
+List.prototype[canSymbol.for("can.deleteKeyValue")] = List.prototype._remove;
+// @@can.keyHasDependencies and @@can.getKeyDependencies same as can-map
+List.prototype[canSymbol.for("can.onKeysAdded")] = function(handler) {
+	this[canSymbol.for("can.onKeyValue")]("add", handler);
+};
+List.prototype[canSymbol.for("can.onKeysRemoved")] = function(handler) {
+	this[canSymbol.for("can.onKeyValue")]("remove", handler);
+};
+List.prototype[canSymbol.for("can.getOwnEnumerableKeys")] = function() {
+	return Object.keys(this._data || {}).concat(this.map(function(val, index) {
+		return index;
+	}));
+};
 
 List.prototype.each = List.prototype.forEach;
 Map.List = List;
