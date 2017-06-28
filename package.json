@@ -1,6 +1,6 @@
 {
   "name": "can-list",
-  "version": "3.1.0",
+  "version": "3.1.0-pre.0",
   "description": "Observable lists",
   "homepage": "http://canjs.com",
   "author": {
@@ -40,10 +40,10 @@
     "can-compute": "^3.1.0-pre.9",
     "can-construct": "^3.2.0-pre.0",
     "can-event": "^3.5.0-pre.2",
-    "can-map": "^3.1.0-pre.10",
+    "can-map": "^3.3.0-pre.0",
     "can-namespace": "1.0.0",
     "can-observation": "^3.2.0-pre.9",
-    "can-reflect": "^1.0.0-pre.1",
+    "can-reflect": "^1.1.0-pre.0",
     "can-symbol": "^1.0.0-pre.0",
     "can-types": "^1.1.0-pre.2",
     "can-util": "^3.9.0-pre.1"

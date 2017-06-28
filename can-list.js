@@ -17,8 +17,8 @@ var types = require('can-types');
 var each = require('can-util/js/each/each');
 var canReflect = require('can-reflect');
 var canSymbol = require('can-symbol');
+var CIDMap = require("can-util/js/cid-map/cid-map");
 
-var setValueSymbol = canSymbol.for("can.setValue");
 
 // Helpers for `observable` lists.
 var splice = [].splice,
@@ -221,7 +221,7 @@ var List = Map.extend(
 		 * Returns the serialized form of this list.
 		 */
 		serialize: function () {
-			return mapHelpers.serialize(this, 'serialize', []);
+			return canReflect.serialize(this, CIDMap);
 		},
 		/**
 		 * @function can.List.prototype.each each
@@ -234,7 +234,7 @@ var List = Map.extend(
 		 * @param {function(*, Number)} callback the function to call for each element
 		 * The value and index of each element will be passed as the first and second
 		 * arguments, respectively, to the callback. If the callback returns false,
-		 * the loop will stop. The callback is not invoked for List elements that were 
+		 * the loop will stop. The callback is not invoked for List elements that were
 		 * never initialized.
 		 *
 		 * @return {can.List} this List, for chaining
@@ -376,50 +376,6 @@ var List = Map.extend(
 			}
 			canBatch.stop();
 			return removed;
-		},
-		_getAttrs: function(){
-			return mapHelpers.serialize(this, 'attr', []);
-		},
-		_setAttrs: function (items, remove) {
-			// Create a copy.
-			items = makeArray(items);
-
-			canBatch.start();
-			this._updateAttrs(items, remove);
-			canBatch.stop();
-		},
-
-		_updateAttrs: function (items, remove) {
-			var len = Math.min(items.length, this.length);
-
-			for (var prop = 0; prop < len; prop++) {
-				var curVal = this[prop],
-					newVal = items[prop];
-
-				if ( canReflect.isMapLike(curVal) && mapHelpers.canMakeObserve(newVal)) {
-					if (setValueSymbol in curVal) {
-						curVal[setValueSymbol](newVal, remove);
-					} else {
-						canReflect.eachKey(curVal, function(val, key) {
-							if (newVal[key]) {
-								canReflect.setKeyValue(curVal, key, val);
-							} else if (remove) {
-								canReflect.deleteKeyValue(curVal, key);
-							}
-						});
-					}
-				} else if (curVal !== newVal) {
-					this._set(prop+"", newVal);
-				} else {
-
-				}
-			}
-			if (items.length > this.length) {
-				// Add in the remaining props.
-				this.push.apply(this, items.slice(this.length));
-			} else if (items.length < this.length && remove) {
-				this.splice(items.length);
-			}
 		}
 	}),
 
@@ -795,7 +751,7 @@ assign(List.prototype, {
 	concat: function() {
 		var args = [],
 			MapType = this.constructor.Map;
-		// Go through each of the passed `arguments` and 
+		// Go through each of the passed `arguments` and
 		// see if it is list-like, an array, or something else
 		each(arguments, function(arg) {
 			if((canReflect.isObservableLike(arg) && canReflect.isListLike(arg)) || Array.isArray(arg)) {
@@ -807,7 +763,7 @@ assign(List.prototype, {
 				});
 			}
 			else {
-				// If it is a Map, Object, or some primitive 
+				// If it is a Map, Object, or some primitive
 				// just pass arg to serializeNonTypes
 				serializeNonTypes(MapType, arg, args);
 			}
@@ -826,7 +782,7 @@ assign(List.prototype, {
 	 * @signature `list.forEach(callback[, thisArg])`
 	 * @param {function(element, index, list)} callback a function to call with each element of the List
 	 * The three parameters that _callback_ gets passed are _element_, the element at _index_, _index_ the
-	 * current element of the list, and _list_ the List the elements are coming from. _callback_ is 
+	 * current element of the list, and _list_ the List the elements are coming from. _callback_ is
 	 * not invoked for List elements that were never initialized.
 	 * @param {Object} [thisArg] the object to use as `this` inside the callback
 	 *
@@ -989,26 +945,55 @@ if(!types.DefaultList) {
 }
 
 // Setup other symbols
-List.prototype[canSymbol.for("can.isListLike")] = true;
-List.prototype[canSymbol.for("can.getKeyValue")] = List.prototype._get;
-List.prototype[canSymbol.for("can.setKeyValue")] = List.prototype._set;
-List.prototype[canSymbol.for("can.getValue")] = List.prototype._getAttrs;
-List.prototype[setValueSymbol] = function(newVal) {
-	return this._setAttrs(newVal, canReflect.isListLike(newVal));
-};
-List.prototype[canSymbol.for("can.deleteKeyValue")] = List.prototype._remove;
+
+canReflect.assignSymbols(List.prototype,{
+	// -type-
+
+	"can.isMoreListLikeThanMapLike":  true,
+	"can.isListLike":  true,
+
+	// -get/set-
+	"can.getKeyValue": List.prototype._get,
+	"can.setKeyValue": List.prototype._set,
+	"can.deleteKeyValue": List.prototype._remove,
+
+	// -shape
+	"can.getOwnEnumerableKeys": function(){
+		return Object.keys(this._data || {}).concat(this.map(function(val, index) {
+			return index;
+		}));
+	},
+
+	// -shape get/set-
+	"can.assignDeep": function(source){
+		canBatch.start();
+		// TODO: we should probably just throw an error instead of cleaning
+		canReflect.assignDeepList(this, source);
+		canBatch.stop();
+	},
+	"can.updateDeep": function(source){
+		canBatch.start();
+		// TODO: we should probably just throw an error instead of cleaning
+		canReflect.updateDeepList(this, source);
+		canBatch.stop();
+	},
+
+	"can.unwrap": mapHelpers.reflectUnwrap,
+	"can.serialize": mapHelpers.reflectSerialize,
+
+	// observable
+	"can.onKeysAdded": function(handler) {
+		this[canSymbol.for("can.onKeyValue")]("add", handler);
+	},
+	"can.onKeysRemoved":  function(handler) {
+		this[canSymbol.for("can.onKeyValue")]("remove", handler);
+	}
+});
+
+
+
+
 // @@can.keyHasDependencies and @@can.getKeyDependencies same as can-map
-List.prototype[canSymbol.for("can.onKeysAdded")] = function(handler) {
-	this[canSymbol.for("can.onKeyValue")]("add", handler);
-};
-List.prototype[canSymbol.for("can.onKeysRemoved")] = function(handler) {
-	this[canSymbol.for("can.onKeyValue")]("remove", handler);
-};
-List.prototype[canSymbol.for("can.getOwnEnumerableKeys")] = function() {
-	return Object.keys(this._data || {}).concat(this.map(function(val, index) {
-		return index;
-	}));
-};
 
 List.prototype.each = List.prototype.forEach;
 Map.List = List;

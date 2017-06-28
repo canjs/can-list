@@ -101,7 +101,8 @@ test('pop unbinds', function () {
 			ok(false, 'called too many times');
 		}
 	});
-	equal(o.attr('foo'), 'bar');
+
+	equal(o.attr('foo'), 'bar', "read foo property");
 	o.attr('foo', 'car');
 	l.pop();
 	o.attr('foo', 'bad');
@@ -496,7 +497,7 @@ QUnit.test("can-reflect setKeyValue", function(){
 	QUnit.equal(a.attr("a"), "c", "setKeyValue");
 });
 
-QUnit.test("can-reflect getKeyDependencies", function() { 
+QUnit.test("can-reflect getKeyDependencies", function() {
 	var a = new Map({ foo: 4 });
 	var b = new List([ "foo", "bar" ]);
 
@@ -515,7 +516,7 @@ QUnit.test("can-reflect getKeyDependencies", function() {
 
 });
 
-QUnit.test("registered symbols", function() { 
+QUnit.test("registered symbols", function() {
 	var a = new Map({ "a": "a" });
 
 	ok(a[canSymbol.for("can.isMapLike")], "can.isMapLike");
