@@ -987,6 +987,9 @@ canReflect.assignSymbols(List.prototype,{
 	},
 	"can.onKeysRemoved":  function(handler) {
 		this[canSymbol.for("can.onKeyValue")]("remove", handler);
+	},
+	"can.splice": function(index, deleteCount, insert){
+		this.splice.apply(this, [index, deleteCount].concat(insert));
 	}
 });
 
