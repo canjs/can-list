@@ -2,7 +2,8 @@
 @inherits can-map
 @download can/list
 @test can/list/test.html
-@parent can-legacy
+@parent can-observables
+@collection can-legacy
 @release 2.0
 @package ../package.json
 
