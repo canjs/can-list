@@ -44,76 +44,10 @@ var serializeNonTypes = function(MapType, arg, args) {
 	}
 };
 
-/**
- * @add can.List
- */
 var List = Map.extend(
-	/**
-	 * @static
-	 */
 	{
-		/**
-		 * @property {can.Map} can.List.Map
-		 *
-		 * @description Specify the Map type used to make objects added to this list observable.
-		 *
-		 * @option {can.Map} When objects are added to a can.List, those objects are
-		 * converted into can.Map instances.  For example:
-		 *
-		 *     var list = new can.List();
-		 *     list.push({name: "Justin"});
-		 *
-		 *     var map = list.attr(0);
-		 *     map.attr("name") //-> "Justin"
-		 *
-		 * By changing [can.List.Map], you can specify a different type of Map instance to
-		 * create. For example:
-		 *
-		 *     var User = can.Map.extend({
-		 *       fullName: function(){
-		 *         return this.attr("first")+" "+this.attr("last")
-		 *       }
-		 *     });
-		 *
-		 *     User.List = can.List.extend({
-		 *       Map: User
-		 *     }, {});
-		 *
-		 *     var list = new User.List();
-		 *     list.push({first: "Justin", last: "Meyer"});
-		 *
-		 *     var user = list.attr(0);
-		 *     user.fullName() //-> "Justin Meyer"
-		 *
-		 *
-		 *
-		 */
 		Map: Map
-		/**
-		 * @function can.Map.extend
-		 *
-		 * @signature `can.List.extend([name,] [staticProperties,] instanceProperties)`
-		 *
-		 * Creates a new extended constructor function. Learn more at [can.Construct.extend].
-		 *
-		 * @param {String} [name] If provided, adds the extened List constructor function
-		 * to the window at the given name.
-		 *
-		 * @param {Object} [staticProperties] Properties and methods
-		 * directly on the constructor function. The most common property to set is [can.List.Map].
-		 *
-		 * @param {Object} [instanceProperties] Properties and methods on instances of this list type.
-		 *
-		 * @body
-		 *
-		 * ## Use
-		 *
-		 *
-		 */
 	},
-	/**
-	 * @prototype
-	 */
 	{
 		setup: function (instances, options) {
 			this.length = 0;
@@ -223,107 +157,6 @@ var List = Map.extend(
 		serialize: function () {
 			return canReflect.serialize(this, CIDMap);
 		},
-		/**
-		 * @function can.List.prototype.each each
-		 * @description Call a function on each element of a List.
-		 * @signature `list.each( callback(item, index) )`
-		 *
-		 * `each` iterates through the List, calling a function
-		 * for each element.
-		 *
-		 * @param {function(*, Number)} callback the function to call for each element
-		 * The value and index of each element will be passed as the first and second
-		 * arguments, respectively, to the callback. If the callback returns false,
-		 * the loop will stop. The callback is not invoked for List elements that were
-		 * never initialized.
-		 *
-		 * @return {can.List} this List, for chaining
-		 *
-		 * @body
-		 * ```
-		 * var i = 0;
-		 * new can.List([1, 10, 100]).each(function(element, index) {
-		 *     i += element;
-		 * });
-		 *
-		 * i; // 111
-		 *
-		 * i = 0;
-		 * new can.List([1, 10, 100]).each(function(element, index) {
-		 *     i += element;
-		 *     if(index >= 1) {
-		 *         return false;
-		 *     }
-		 * });
-		 *
-		 * i; // 11
-		 * ```
-		 */
-		//
-		/**
-		 * @function can.List.prototype.splice splice
-		 * @description Insert and remove elements from a List.
-		 * @signature `list.splice(index[, howMany[, ...newElements]])`
-		 * @param {Number} index where to start removing or inserting elements
-		 *
-		 * @param {Number} [howMany] the number of elements to remove
-		 * If _howMany_ is not provided, `splice` will remove all elements from `index` to the end of the List.
-		 *
-		 * @param {*} newElements elements to insert into the List
-		 *
-		 * @return {Array} the elements removed by `splice`
-		 *
-		 * @body
-		 * `splice` lets you remove elements from and insert elements into a List.
-		 *
-		 * This example demonstrates how to do surgery on a list of numbers:
-		 *
-		 * ```
-		 * var list = new can.List([0, 1, 2, 3]);
-		 *
-		 * // starting at index 2, remove one element and insert 'Alice' and 'Bob':
-		 * list.splice(2, 1, 'Alice', 'Bob');
-		 * list.attr(); // [0, 1, 'Alice', 'Bob', 3]
-		 * ```
-		 *
-		 * ## Events
-		 *
-		 * `splice` causes the List it's called on to emit _change_ events,
-		 * _add_ events, _remove_ events, and _length_ events. If there are
-		 * any elements to remove, a _change_ event, a _remove_ event, and a
-		 * _length_ event will be fired. If there are any elements to insert, a
-		 * separate _change_ event, an _add_ event, and a separate _length_ event
-		 * will be fired.
-		 *
-		 * This slightly-modified version of the above example should help
-		 * make it clear how `splice` causes events to be emitted:
-		 *
-		 * ```
-		 * var list = new can.List(['a', 'b', 'c', 'd']);
-		 * list.bind('change', function(ev, attr, how, newVals, oldVals) {
-		 *     console.log('change: ' + attr + ', ' + how + ', ' + newVals + ', ' + oldVals);
-		 * });
-		 * list.bind('add', function(ev, newVals, where) {
-		 *     console.log('add: ' + newVals + ', ' + where);
-		 * });
-		 * list.bind('remove', function(ev, oldVals, where) {
-		 *     console.log('remove: ' + oldVals + ', ' + where);
-		 * });
-		 * list.bind('length', function(ev, length) {
-		 *     console.log('length: ' + length + ', ' + this.attr());
-		 * });
-		 *
-		 * // starting at index 2, remove one element and insert 'Alice' and 'Bob':
-		 * list.splice(2, 1, 'Alice', 'Bob'); // change: 2, 'remove', undefined, ['c']
-		 *                                    // remove: ['c'], 2
-		 *                                    // length: 5, ['a', 'b', 'Alice', 'Bob', 'd']
-		 *                                    // change: 2, 'add', ['Alice', 'Bob'], ['c']
-		 *                                    // add: ['Alice', 'Bob'], 2
-		 *                                    // length: 5, ['a', 'b', 'Alice', 'Bob', 'd']
-		 * ```
-		 *
-		 * More information about binding to these events can be found under [can.List.attr attr].
-		 */
 		splice: function (index, howMany) {
 			var args = makeArray(arguments),
 				added =[],
@@ -388,7 +221,8 @@ var List = Map.extend(
 // Create `push`, `pop`, `shift`, and `unshift`
 each({
 		/**
-		 * @function can.List.prototype.push push
+		 * @function can-list.prototype.push push
+		 * @parent can-list.prototype
 		 * @description Add elements to the end of a list.
 		 * @signature `list.push(...elements)`
 		 *
@@ -402,7 +236,7 @@ each({
 		 * `push` adds elements onto the end of a List here is an example:
 		 *
 		 * ```
-		 * var list = new can.List(['Alice']);
+		 * var list = new List(['Alice']);
 		 *
 		 * list.push('Bob', 'Eve');
 		 * list.attr(); // ['Alice', 'Bob', 'Eve']
@@ -413,7 +247,7 @@ each({
 		 *
 		 * ```
 		 * var names = ['Bob', 'Eve'],
-		 *     list = new can.List(['Alice']);
+		 *     list = new List(['Alice']);
 		 *
 		 * list.push.apply(list, names);
 		 * list.attr(); // ['Alice', 'Bob', 'Eve']
@@ -425,12 +259,13 @@ each({
 		 *
 		 * ## See also
 		 *
-		 * `push` has a counterpart in [can.List::pop pop], or you may be
-		 * looking for [can.List::unshift unshift] and its counterpart [can.List::shift shift].
+		 * `push` has a counterpart in [can-list.prototype.pop], or you may be
+		 * looking for [can-list.prototype.unshift] and its counterpart [can-list.prototype.shift].
 		 */
 		push: "length",
 		/**
-		 * @function can.List.prototype.unshift unshift
+		 * @function can-list.prototype.unshift unshift
+		 * @parent can-list.prototype
 		 * @description Add elements to the beginning of a List.
 		 * @signature `list.unshift(...elements)`
 		 *
@@ -444,7 +279,7 @@ each({
 		 * `unshift` adds elements to the front of the list in bulk in the order specified:
 		 *
 		 * ```
-		 * var list = new can.List(['Alice']);
+		 * var list = new List(['Alice']);
 		 *
 		 * list.unshift('Bob', 'Eve');
 		 * list.attr(); // ['Bob', 'Eve', 'Alice']
@@ -455,7 +290,7 @@ each({
 		 *
 		 * ```
 		 * var names = ['Bob', 'Eve'],
-		 *     list = new can.List(['Alice']);
+		 *     list = new List(['Alice']);
 		 *
 		 * list.unshift.apply(list, names);
 		 * list.attr(); // ['Bob', 'Eve', 'Alice']
@@ -467,8 +302,8 @@ each({
 		 *
 		 * ## See also
 		 *
-		 * `unshift` has a counterpart in [can.List::shift shift], or you may be
-		 * looking for [can.List::push push] and its counterpart [can.List::pop pop].
+		 * `unshift` has a counterpart in [can-list.prototype.shift], or you may be
+		 * looking for [can-list.prototype.push] and its counterpart [can-list.prototype.pop].
 		 */
 		unshift: 0
 	},
@@ -505,7 +340,8 @@ each({
 
 each({
 		/**
-		 * @function can.List.prototype.pop pop
+		 * @function can-list.prototype.pop pop
+		 * @parent can-list.prototype
 		 * @description Remove an element from the end of a List.
 		 * @signature `list.pop()`
 		 *
@@ -514,10 +350,10 @@ each({
 		 * @return {*} the element just popped off the List, or `undefined` if the List was empty
 		 *
 		 * @body
-		 * `pop` is the opposite action from `[can.List.push push]`:
+		 * `pop` is the opposite action from [can-list.prototype.push]:
 		 *
 		 * ```
-		 * var list = new can.List(['Alice', 'Bob', 'Eve']);
+		 * var list = new List(['Alice', 'Bob', 'Eve']);
 		 * list.attr(); // ['Alice', 'Bob', 'Eve']
 		 *
 		 * list.pop(); // 'Eve'
@@ -533,12 +369,13 @@ each({
 		 *
 		 * ## See also
 		 *
-		 * `pop` has its counterpart in [can.List::push push], or you may be
-		 * looking for [can.List::unshift unshift] and its counterpart [can.List::shift shift].
+		 * `pop` has its counterpart in [can-list.prototype.push], or you may be
+		 * looking for [can-list.prototype.unshift] and its counterpart [can-list.prototype.shift].
 		 */
 		pop: "length",
 		/**
-		 * @function can.List.prototype.shift shift
+		 * @function can-list.prototype.shift shift
+		 * @parent can-list.prototype
 		 * @description Remove en element from the front of a list.
 		 * @signature `list.shift()`
 		 *
@@ -547,10 +384,10 @@ each({
 		 * @return {*} the element just shifted off the List, or `undefined` if the List is empty
 		 *
 		 * @body
-		 * `shift` is the opposite action from `[can.List::unshift unshift]`:
+		 * `shift` is the opposite action from `[can-list.prototype.unshift]`:
 		 *
 		 * ```
-		 * var list = new can.List(['Alice']);
+		 * var list = new List(['Alice']);
 		 *
 		 * list.unshift('Bob', 'Eve');
 		 * list.attr(); // ['Bob', 'Eve', 'Alice']
@@ -568,8 +405,8 @@ each({
 		 *
 		 * ## See also
 		 *
-		 * `shift` has a counterpart in [can.List::unshift unshift], or you may be
-		 * looking for [can.List::push push] and its counterpart [can.List::pop pop].
+		 * `shift` has a counterpart in [can-list.prototype.unshift], or you may be
+		 * looking for [can-list.prototype.push] and its counterpart [can-list.prototype.pop].
 		 */
 		shift: 0
 	},
@@ -604,7 +441,8 @@ each({
 
 assign(List.prototype, {
 	/**
-	 * @function can.List.prototype.indexOf indexOf
+	 * @function can-list.prototype.indexOf indexOf
+	 * @parent can-list.prototype
 	 * @description Look for an item in a List.
 	 * @signature `list.indexOf(item)`
 	 *
@@ -616,7 +454,7 @@ assign(List.prototype, {
 	 *
 	 * @body
 	 * ```
-	 * var list = new can.List(['Alice', 'Bob', 'Eve']);
+	 * var list = new List(['Alice', 'Bob', 'Eve']);
 	 * list.indexOf('Alice');   // 0
 	 * list.indexOf('Charlie'); // -1
 	 * ```
@@ -640,7 +478,8 @@ assign(List.prototype, {
 	},
 
 	/**
-	 * @function can.List.prototype.join join
+	 * @function can-list.prototype.join join
+	 * @parent can-list.prototype
 	 * @description Join a List's elements into a string.
 	 * @signature `list.join(separator)`
 	 *
@@ -653,10 +492,10 @@ assign(List.prototype, {
 	 *
 	 * @body
 	 * ```
-	 * var list = new can.List(['Alice', 'Bob', 'Eve']);
+	 * var list = new List(['Alice', 'Bob', 'Eve']);
 	 * list.join(', '); // 'Alice, Bob, Eve'
 	 *
-	 * var beatles = new can.List(['John', 'Paul', 'Ringo', 'George']);
+	 * var beatles = new List(['John', 'Paul', 'Ringo', 'George']);
 	 * beatles.join('&'); // 'John&Paul&Ringo&George'
 	 * ```
 	 */
@@ -666,17 +505,18 @@ assign(List.prototype, {
 	},
 
 	/**
-	 * @function can.List.prototype.reverse reverse
+	 * @function can-list.prototype.reverse reverse
+	 * @parent can-list.prototype
 	 * @description Reverse the order of a List.
 	 * @signature `list.reverse()`
 	 *
 	 * `reverse` reverses the elements of the List in place.
 	 *
-	 * @return {can.List} the List, for chaining
+	 * @return {can-list} the List, for chaining
 	 *
 	 * @body
 	 * ```
-	 * var list = new can.List(['Alice', 'Bob', 'Eve']);
+	 * var list = new List(['Alice', 'Bob', 'Eve']);
 	 * var reversedList = list.reverse();
 	 *
 	 * reversedList.attr(); // ['Eve', 'Bob', 'Alice'];
@@ -689,7 +529,8 @@ assign(List.prototype, {
 	},
 
 	/**
-	 * @function can.List.prototype.slice slice
+	 * @function can-list.prototype.slice slice
+	 * @parent can-list.prototype
 	 * @description Make a copy of a part of a List.
 	 * @signature `list.slice([start[, end]])`
 	 *
@@ -700,11 +541,11 @@ assign(List.prototype, {
 	 * @param {Number} [end] the first index not to include in the copy
 	 * If _end_ is not supplied, `slice` will copy until the end of the list.
 	 *
-	 * @return {can.List} a new `can.List` with the extracted elements
+	 * @return {can-list} a new `can-list` with the extracted elements
 	 *
 	 * @body
 	 * ```
-	 * var list = new can.List(['Alice', 'Bob', 'Charlie', 'Daniel', 'Eve']);
+	 * var list = new List(['Alice', 'Bob', 'Charlie', 'Daniel', 'Eve']);
 	 * var newList = list.slice(1, 4);
 	 * newList.attr(); // ['Bob', 'Charlie', 'Daniel']
 	 * ```
@@ -712,7 +553,7 @@ assign(List.prototype, {
 	 * `slice` is the simplest way to copy a List:
 	 *
 	 * ```
-	 * var list = new can.List(['Alice', 'Bob', 'Eve']);
+	 * var list = new List(['Alice', 'Bob', 'Eve']);
 	 * var copy = list.slice();
 	 *
 	 * copy.attr();   // ['Alice', 'Bob', 'Eve']
@@ -727,10 +568,11 @@ assign(List.prototype, {
 	},
 
 	/**
-	 * @function can.List.prototype.concat concat
+	 * @function can-list.prototype.concat concat
+	 * @parent can-list.prototype
 	 * @description Merge many collections together into a List.
 	 * @signature `list.concat(...args)`
-	 * @param {Array|can.List|*} args Any number of arrays, Lists, or values to add in
+	 * @param {Array|can-list|*} args Any number of arrays, Lists, or values to add in
 	 * For each parameter given, if it is an Array or a List, each of its elements will be added to
 	 * the end of the concatenated List. Otherwise, the parameter itself will be added.
 	 *
@@ -738,11 +580,11 @@ assign(List.prototype, {
 	 * `concat` makes a new List with the elements of the List followed by the elements of the parameters.
 	 *
 	 * ```
-	 * var list = new can.List();
+	 * var list = new List();
 	 * var newList = list.concat(
 	 *     'Alice',
 	 *     ['Bob', 'Charlie']),
-	 *     new can.List(['Daniel', 'Eve']),
+	 *     new List(['Daniel', 'Eve']),
 	 *     {f: 'Francis'}
 	 * );
 	 * newList.attr(); // ['Alice', 'Bob', 'Charlie', 'Daniel', 'Eve', {f: 'Francis'}]
@@ -777,7 +619,8 @@ assign(List.prototype, {
 	},
 
 	/**
-	 * @function can.List.prototype.forEach forEach
+	 * @function can-list.prototype.forEach forEach
+	 * @parent can-list.prototype
 	 * @description Call a function for each element of a List.
 	 * @signature `list.forEach(callback[, thisArg])`
 	 * @param {function(element, index, list)} callback a function to call with each element of the List
@@ -790,7 +633,7 @@ assign(List.prototype, {
 	 * `forEach` calls a callback for each element in the List.
 	 *
 	 * ```
-	 * var list = new can.List([1, 2, 3]);
+	 * var list = new List([1, 2, 3]);
 	 * list.forEach(function(element, index, list) {
 	 *     list.attr(index, element * element);
 	 * });
@@ -809,18 +652,19 @@ assign(List.prototype, {
 	},
 
 	/**
-	 * @function can.List.prototype.replace replace
+	 * @function can-list.prototype.replace replace
+	 * @parent can-list.prototype
 	 * @description Replace all the elements of a List.
 	 * @signature `list.replace(collection)`
-	 * @param {Array|can.List|can.Deferred} collection the collection of new elements to use
-	 * If a [can.Deferred] is passed, it must resolve to an `Array` or `can.List`.
+	 * @param {Array|can-list|can.Deferred} collection the collection of new elements to use
+	 * If a [can.Deferred] is passed, it must resolve to an `Array` or `can-list`.
 	 * The elements of the list are not actually removed until the Deferred resolves.
 	 *
 	 * @body
 	 * `replace` replaces all the elements of this List with new ones.
 	 *
-	 * `replace` is especially useful when `can.List`s are live-bound into `[can.Control]`s,
-	 * and you intend to populate them with the results of a `[can.Model]` call:
+	 * `replace` is especially useful when `can-list`s are live-bound into `[can-control]`s,
+	 * and you intend to populate them with the results of a `[can-model]` call:
 	 *
 	 * ```
 	 * can.Control({
@@ -844,12 +688,12 @@ assign(List.prototype, {
 	 *
 	 * The differences in the events fired by `attr` and `replace` are demonstrated concretely by this example:
 	 * ```
-	 * var attrList = new can.List(['Alexis', 'Bill']);
+	 * var attrList = new List(['Alexis', 'Bill']);
 	 * attrList.bind('change', function(ev, index, how, newVals, oldVals) {
 	 *     console.log(index + ', ' + how + ', ' + newVals + ', ' + oldVals);
 	 * });
 	 *
-	 * var replaceList = new can.List(['Alexis', 'Bill']);
+	 * var replaceList = new List(['Alexis', 'Bill']);
 	 * replaceList.bind('change', function(ev, index, how, newVals, oldVals) {
 	 *     console.log(index + ', ' + how + ', ' + newVals + ', ' + oldVals);
 	 * });
