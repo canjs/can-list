@@ -80,9 +80,11 @@ var List = Map.extend(
 				if (how === 'add') {
 					canEvent.dispatch.call(this, how, [newVal, index]);
 					canEvent.dispatch.call(this, 'length', [this.length]);
+					canEvent.dispatch.call(this, 'can.onPatches', [[{insert: newVal, index: index, deleteCount: 0}]]);
 				} else if (how === 'remove') {
 					canEvent.dispatch.call(this, how, [oldVal, index]);
 					canEvent.dispatch.call(this, 'length', [this.length]);
+					canEvent.dispatch.call(this, 'can.onPatches', [[{index: index, deleteCount: oldVal.length}]]);
 				} else {
 					canEvent.dispatch.call(this, how, [newVal, index]);
 				}
@@ -832,6 +834,12 @@ canReflect.assignSymbols(List.prototype,{
 	},
 	"can.onKeysRemoved":  function(handler) {
 		this[canSymbol.for("can.onKeyValue")]("remove", handler);
+	},
+	"can.onPatches": function(handler,queue){
+		this[canSymbol.for("can.onKeyValue")]("can.onPatches", handler,queue);
+	},
+	"can.offPatches": function(handler,queue) {
+		this[canSymbol.for("can.offKeyValue")]("can.onPatches", handler,queue);
 	},
 	"can.splice": function(index, deleteCount, insert){
 		this.splice.apply(this, [index, deleteCount].concat(insert));

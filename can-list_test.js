@@ -533,3 +533,25 @@ QUnit.test("registered symbols", function() {
 	a[canSymbol.for("can.offKeyValue")]("a", handler);
 	a.attr("a", "d"); // doesn't trigger handler
 });
+
+QUnit.test("onPatches", function () {
+	var list = new List([ "a", "b" ]);
+	var PATCHES = [
+		[ { deleteCount: 2, index: 0 } ],
+		[ { index: 0, insert: ["A", "B"], deleteCount: 0 } ]
+	];
+
+	var handlerCalls = 0;
+	var handler = function (patches) {
+		QUnit.deepEqual(patches, PATCHES[handlerCalls], "patches looked right for " + handlerCalls);
+		handlerCalls++;
+	};
+
+	list[canSymbol.for("can.onPatches")](handler, "notify");
+
+	list.replace(["A", "B"]);
+
+	list[canSymbol.for("can.offPatches")](handler, "notify");
+
+	list.replace(["1", "2"]);
+});
