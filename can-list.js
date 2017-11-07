@@ -1,12 +1,10 @@
 /* jshint -W079 */
-require('can-event');
-
 var namespace = require('can-namespace');
 var Map = require('can-map');
 var bubble = require('can-map/bubble');
 var mapHelpers = require('can-map/map-helpers');
-var canBatch = require('can-event/batch/batch');
-var canEvent = require('can-event');
+var queues = require('can-queues');
+var canEvent = require('can-event-queue');
 var Observation = require('can-observation');
 
 var CID = require('can-cid');
@@ -196,7 +194,7 @@ var List = Map.extend(
 				}
 			}
 
-			canBatch.start();
+			queues.batch.start();
 			if (howMany > 0) {
 				// tears down bubbling
 				bubble.removeMany(this, removed);
@@ -207,7 +205,7 @@ var List = Map.extend(
 				bubble.addMany(this, added);
 				this._triggerChange("" + index, "add", added, removed);
 			}
-			canBatch.stop();
+			queues.batch.stop();
 			return removed;
 		}
 	}),
@@ -810,16 +808,16 @@ canReflect.assignSymbols(List.prototype,{
 
 	// -shape get/set-
 	"can.assignDeep": function(source){
-		canBatch.start();
+		queues.batch.start();
 		// TODO: we should probably just throw an error instead of cleaning
 		canReflect.assignDeepList(this, source);
-		canBatch.stop();
+		queues.batch.stop();
 	},
 	"can.updateDeep": function(source){
-		canBatch.start();
+		queues.batch.start();
 		// TODO: we should probably just throw an error instead of cleaning
 		canReflect.updateDeepList(this, source);
-		canBatch.stop();
+		queues.batch.stop();
 	},
 
 	"can.unwrap": mapHelpers.reflectUnwrap,

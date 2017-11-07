@@ -358,21 +358,17 @@ test("slice and join are observable by a compute (#1884)", function(){
 
 	var sliced = new Observation(function(){
 		return list.slice(0,1);
-	}, null, {
-		updater: function(newVal){
-			deepEqual(newVal.attr(), [2], "got a new List");
-		}
 	});
-	sliced.start();
+	canReflect.onValue(sliced, function(newVal){
+		deepEqual(newVal.attr(), [2], "got a new List");
+	});
 
 	var joined = new Observation(function(){
 		return list.join(",");
-	}, null, {
-		updater: function(newVal){
-			equal(newVal, "2,3", "joined is observable");
-		}
 	});
-	joined.start();
+	canReflect.onValue(joined, function(newVal){
+		equal(newVal, "2,3", "joined is observable");
+	});
 
 
 	list.shift();
@@ -479,8 +475,11 @@ test("works with can-reflect", 11, function(){
 
 	canReflect.onKeysAdded(b, handler);
 	canReflect.onKeysRemoved(b, handler);
-	QUnit.ok(b.__bindEvents.add, "add handler added");
-	QUnit.ok(b.__bindEvents.remove, "remove handler added");
+	var handlers = b[canSymbol.for("can.meta")].handlers;
+
+
+	QUnit.ok(handlers.get(["add"]).length, "add handler added");
+	QUnit.ok(handlers.get(["remove"]).length, "remove handler added");
 
 	b.push("quux");
 
