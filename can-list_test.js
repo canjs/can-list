@@ -537,8 +537,8 @@ QUnit.test("registered symbols", function() {
 QUnit.test("onPatches", function () {
 	var list = new List([ "a", "b" ]);
 	var PATCHES = [
-		[ { deleteCount: 2, index: 0 } ],
-		[ { index: 0, insert: ["A", "B"], deleteCount: 0 } ]
+		[ { deleteCount: 2, index: 0, type: "splice" } ],
+		[ { index: 0, insert: ["A", "B"], deleteCount: 0, type: "splice" } ]
 	];
 
 	var handlerCalls = 0;
