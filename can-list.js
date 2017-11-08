@@ -70,25 +70,32 @@ var List = Map.extend(
 			assign(this, options);
 		},
 		_triggerChange: function (attr, how, newVal, oldVal) {
-
-			Map.prototype._triggerChange.apply(this, arguments);
 			// `batchTrigger` direct add and remove events...
-			var index = +attr;
+			var index = +attr, patches;
 			// Make sure this is not nested and not an expando
 			if (!~(""+attr).indexOf('.') && !isNaN(index)) {
-
+				if(bubble.isBubbling(this, "change")) {
+					canEvent.dispatch.call(this, {
+						type: "change",
+						target: this
+					}, [attr, how, newVal, oldVal]);
+				}
 				if (how === 'add') {
-					canEvent.dispatch.call(this, how, [newVal, index]);
+					patches = [{insert: newVal, index: index, deleteCount: 0, type: "splice"}];
+					canEvent.dispatch.call(this, {type: how, patches: patches}, [newVal, index]);
 					canEvent.dispatch.call(this, 'length', [this.length]);
-					canEvent.dispatch.call(this, 'can.onPatches', [[{insert: newVal, index: index, deleteCount: 0}]]);
+					canEvent.dispatch.call(this, 'can.onPatches', [patches]);
 				} else if (how === 'remove') {
-					canEvent.dispatch.call(this, how, [oldVal, index]);
+					patches = [{index: index, deleteCount: oldVal.length, type: "splice"}];
+					canEvent.dispatch.call(this, {type: how, patches: patches}, [oldVal, index]);
 					canEvent.dispatch.call(this, 'length', [this.length]);
-					canEvent.dispatch.call(this, 'can.onPatches', [[{index: index, deleteCount: oldVal.length}]]);
+					canEvent.dispatch.call(this, 'can.onPatches', [patches]);
 				} else {
 					canEvent.dispatch.call(this, how, [newVal, index]);
 				}
 
+			} else {
+				Map.prototype._triggerChange.apply(this, arguments);
 			}
 
 			canQueues.deriveQueue.flush();

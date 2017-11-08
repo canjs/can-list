@@ -555,3 +555,53 @@ QUnit.test("onPatches", function () {
 
 	list.replace(["1", "2"]);
 });
+
+
+QUnit.test("can.onInstancePatches basics", function(){
+    var People = List.extend({});
+
+    var calls = [];
+    function handler(obj, patches) {
+        calls.push([obj, patches]);
+    }
+
+    People[canSymbol.for("can.onInstancePatches")](handler);
+
+    var list = new People([1,2]);
+    list.push(3);
+    list.attr("count", 8);
+    People[canSymbol.for("can.offInstancePatches")](handler);
+    list.push(4);
+    list.attr("count", 7);
+
+    QUnit.deepEqual(calls,[
+        [list,  [{type: "splice", index: 2, deleteCount: 0, insert: [3]} ] ],
+        [list, [{type: "set",    key: "count", value: 8} ] ]
+    ]);
+});
+
+QUnit.test("can.onInstanceBoundChange basics", function(){
+
+    var People = List.extend({});
+
+    var calls = [];
+    function handler(obj, patches) {
+        calls.push([obj, patches]);
+    }
+
+    People[canSymbol.for("can.onInstanceBoundChange")](handler);
+
+    var people = new People([]);
+    var bindHandler = function(){};
+    canReflect.onKeyValue(people,"length", bindHandler);
+	canReflect.offKeyValue(people,"length", bindHandler);
+
+    People[canSymbol.for("can.offInstanceBoundChange")](handler);
+	canReflect.onKeyValue(people,"length", bindHandler);
+	canReflect.offKeyValue(people,"length", bindHandler);
+
+    QUnit.deepEqual(calls,[
+        [people,  true ],
+        [people, false ]
+    ]);
+});
