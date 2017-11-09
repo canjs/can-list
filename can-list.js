@@ -16,7 +16,6 @@ var each = require('can-util/js/each/each');
 var canReflect = require('can-reflect');
 var canSymbol = require('can-symbol');
 var CIDMap = require("can-util/js/cid-map/cid-map");
-var canQueues = require("can-queues");
 
 
 // Helpers for `observable` lists.
