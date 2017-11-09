@@ -70,6 +70,7 @@ var List = Map.extend(
 			assign(this, options);
 		},
 		_triggerChange: function (attr, how, newVal, oldVal) {
+			queues.batch.start();
 			// `batchTrigger` direct add and remove events...
 			var index = +attr, patches;
 			// Make sure this is not nested and not an expando
@@ -97,9 +98,7 @@ var List = Map.extend(
 			} else {
 				Map.prototype._triggerChange.apply(this, arguments);
 			}
-
-			canQueues.deriveQueue.flush();
-
+			queues.batch.stop();
 		},
 		___get: function (attr) {
 			if (attr) {
