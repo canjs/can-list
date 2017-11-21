@@ -4,7 +4,7 @@ var Map = require('can-map');
 var bubble = require('can-map/bubble');
 var mapHelpers = require('can-map/map-helpers');
 var queues = require('can-queues');
-var canEvent = require('can-event-queue');
+var canEvent = require('can-event-queue/map/legacy/legacy');
 var Observation = require('can-observation');
 
 var CID = require('can-cid');
