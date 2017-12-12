@@ -745,7 +745,7 @@ assign(List.prototype, {
 		var filteredList = new this.constructor(),
 			self = this,
 			filtered;
-		this.each(function(item, index, list){
+		this.forEach(function(item, index, list){
 			filtered = callback.call( thisArg || self, item, index, self);
 			if(filtered){
 				filteredList.push(item);
@@ -756,7 +756,7 @@ assign(List.prototype, {
 	map: function (callback, thisArg) {
 		var filteredList = new List(),
 			self = this;
-		this.each(function(item, index, list){
+		this.forEach(function(item, index, list){
 			var mapped = callback.call( thisArg || self, item, index, self);
 			filteredList.push(mapped);
 
@@ -856,6 +856,5 @@ canReflect.assignSymbols(List.prototype,{
 
 // @@can.keyHasDependencies and @@can.getKeyDependencies same as can-map
 
-List.prototype.each = List.prototype.forEach;
 Map.List = List;
 module.exports = namespace.List = List;

@@ -413,17 +413,6 @@ test('forEach callback', function () {
 	equal(counter, 1, 'Should not be invoked for uninitialized attr keys');
 });
 
-test('each callback', function () {
-	var list = new List([]),
-		counter = 0;
-	list.attr(9, 'foo');
-
-	list.each(function (item, index) {
-		counter++;
-	});
-	equal(counter, 1, 'Should not be invoked for uninitialized attr keys');
-});
-
 test('filter with context', function(){
 	var l = new List([{id: 1}]);
 	var context = {};
