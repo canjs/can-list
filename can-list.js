@@ -1,12 +1,10 @@
 /* jshint -W079 */
-require('can-event');
-
 var namespace = require('can-namespace');
 var Map = require('can-map');
 var bubble = require('can-map/bubble');
 var mapHelpers = require('can-map/map-helpers');
-var canBatch = require('can-event/batch/batch');
-var canEvent = require('can-event');
+var queues = require('can-queues');
+var canEvent = require('can-event-queue/map/map');
 var Observation = require('can-observation');
 
 var CID = require('can-cid');
@@ -71,25 +69,35 @@ var List = Map.extend(
 			assign(this, options);
 		},
 		_triggerChange: function (attr, how, newVal, oldVal) {
-
-			Map.prototype._triggerChange.apply(this, arguments);
+			queues.batch.start();
 			// `batchTrigger` direct add and remove events...
-			var index = +attr;
+			var index = +attr, patches;
 			// Make sure this is not nested and not an expando
 			if (!~(""+attr).indexOf('.') && !isNaN(index)) {
-
+				if(bubble.isBubbling(this, "change")) {
+					canEvent.dispatch.call(this, {
+						type: "change",
+						target: this
+					}, [attr, how, newVal, oldVal]);
+				}
 				if (how === 'add') {
-					canEvent.dispatch.call(this, how, [newVal, index]);
+					patches = [{insert: newVal, index: index, deleteCount: 0, type: "splice"}];
+					canEvent.dispatch.call(this, {type: how, patches: patches}, [newVal, index]);
 					canEvent.dispatch.call(this, 'length', [this.length]);
+					canEvent.dispatch.call(this, 'can.onPatches', [patches]);
 				} else if (how === 'remove') {
-					canEvent.dispatch.call(this, how, [oldVal, index]);
+					patches = [{index: index, deleteCount: oldVal.length, type: "splice"}];
+					canEvent.dispatch.call(this, {type: how, patches: patches}, [oldVal, index]);
 					canEvent.dispatch.call(this, 'length', [this.length]);
+					canEvent.dispatch.call(this, 'can.onPatches', [patches]);
 				} else {
 					canEvent.dispatch.call(this, how, [newVal, index]);
 				}
 
+			} else {
+				Map.prototype._triggerChange.apply(this, arguments);
 			}
-
+			queues.batch.stop();
 		},
 		___get: function (attr) {
 			if (attr) {
@@ -196,7 +204,7 @@ var List = Map.extend(
 				}
 			}
 
-			canBatch.start();
+			queues.batch.start();
 			if (howMany > 0) {
 				// tears down bubbling
 				bubble.removeMany(this, removed);
@@ -207,7 +215,7 @@ var List = Map.extend(
 				bubble.addMany(this, added);
 				this._triggerChange("" + index, "add", added, removed);
 			}
-			canBatch.stop();
+			queues.batch.stop();
 			return removed;
 		}
 	}),
@@ -737,7 +745,7 @@ assign(List.prototype, {
 		var filteredList = new this.constructor(),
 			self = this,
 			filtered;
-		this.each(function(item, index, list){
+		this.forEach(function(item, index, list){
 			filtered = callback.call( thisArg || self, item, index, self);
 			if(filtered){
 				filteredList.push(item);
@@ -748,7 +756,7 @@ assign(List.prototype, {
 	map: function (callback, thisArg) {
 		var filteredList = new List(),
 			self = this;
-		this.each(function(item, index, list){
+		this.forEach(function(item, index, list){
 			var mapped = callback.call( thisArg || self, item, index, self);
 			filteredList.push(mapped);
 
@@ -810,16 +818,16 @@ canReflect.assignSymbols(List.prototype,{
 
 	// -shape get/set-
 	"can.assignDeep": function(source){
-		canBatch.start();
+		queues.batch.start();
 		// TODO: we should probably just throw an error instead of cleaning
 		canReflect.assignDeepList(this, source);
-		canBatch.stop();
+		queues.batch.stop();
 	},
 	"can.updateDeep": function(source){
-		canBatch.start();
+		queues.batch.start();
 		// TODO: we should probably just throw an error instead of cleaning
 		canReflect.updateDeepList(this, source);
-		canBatch.stop();
+		queues.batch.stop();
 	},
 
 	"can.unwrap": mapHelpers.reflectUnwrap,
@@ -832,6 +840,12 @@ canReflect.assignSymbols(List.prototype,{
 	"can.onKeysRemoved":  function(handler) {
 		this[canSymbol.for("can.onKeyValue")]("remove", handler);
 	},
+	"can.onPatches": function(handler,queue){
+		this[canSymbol.for("can.onKeyValue")]("can.onPatches", handler,queue);
+	},
+	"can.offPatches": function(handler,queue) {
+		this[canSymbol.for("can.offKeyValue")]("can.onPatches", handler,queue);
+	},
 	"can.splice": function(index, deleteCount, insert){
 		this.splice.apply(this, [index, deleteCount].concat(insert));
 	}
@@ -842,6 +856,5 @@ canReflect.assignSymbols(List.prototype,{
 
 // @@can.keyHasDependencies and @@can.getKeyDependencies same as can-map
 
-List.prototype.each = List.prototype.forEach;
 Map.List = List;
 module.exports = namespace.List = List;

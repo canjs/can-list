@@ -358,21 +358,17 @@ test("slice and join are observable by a compute (#1884)", function(){
 
 	var sliced = new Observation(function(){
 		return list.slice(0,1);
-	}, null, {
-		updater: function(newVal){
-			deepEqual(newVal.attr(), [2], "got a new List");
-		}
 	});
-	sliced.start();
+	canReflect.onValue(sliced, function(newVal){
+		deepEqual(newVal.attr(), [2], "got a new List");
+	});
 
 	var joined = new Observation(function(){
 		return list.join(",");
-	}, null, {
-		updater: function(newVal){
-			equal(newVal, "2,3", "joined is observable");
-		}
 	});
-	joined.start();
+	canReflect.onValue(joined, function(newVal){
+		equal(newVal, "2,3", "joined is observable");
+	});
 
 
 	list.shift();
@@ -412,17 +408,6 @@ test('forEach callback', function () {
 	list.attr(9, 'foo');
 
 	list.forEach(function (element, index, list) {
-		counter++;
-	});
-	equal(counter, 1, 'Should not be invoked for uninitialized attr keys');
-});
-
-test('each callback', function () {
-	var list = new List([]),
-		counter = 0;
-	list.attr(9, 'foo');
-
-	list.each(function (item, index) {
 		counter++;
 	});
 	equal(counter, 1, 'Should not be invoked for uninitialized attr keys');
@@ -479,8 +464,11 @@ test("works with can-reflect", 11, function(){
 
 	canReflect.onKeysAdded(b, handler);
 	canReflect.onKeysRemoved(b, handler);
-	QUnit.ok(b.__bindEvents.add, "add handler added");
-	QUnit.ok(b.__bindEvents.remove, "remove handler added");
+	var handlers = b[canSymbol.for("can.meta")].handlers;
+
+
+	QUnit.ok(handlers.get(["add"]).length, "add handler added");
+	QUnit.ok(handlers.get(["remove"]).length, "remove handler added");
 
 	b.push("quux");
 
@@ -533,4 +521,76 @@ QUnit.test("registered symbols", function() {
 
 	a[canSymbol.for("can.offKeyValue")]("a", handler);
 	a.attr("a", "d"); // doesn't trigger handler
+});
+
+QUnit.test("onPatches", function () {
+	var list = new List([ "a", "b" ]);
+	var PATCHES = [
+		[ { deleteCount: 2, index: 0, type: "splice" } ],
+		[ { index: 0, insert: ["A", "B"], deleteCount: 0, type: "splice" } ]
+	];
+
+	var handlerCalls = 0;
+	var handler = function (patches) {
+		QUnit.deepEqual(patches, PATCHES[handlerCalls], "patches looked right for " + handlerCalls);
+		handlerCalls++;
+	};
+
+	list[canSymbol.for("can.onPatches")](handler, "notify");
+
+	list.replace(["A", "B"]);
+
+	list[canSymbol.for("can.offPatches")](handler, "notify");
+
+	list.replace(["1", "2"]);
+});
+
+
+QUnit.test("can.onInstancePatches basics", function(){
+    var People = List.extend({});
+
+    var calls = [];
+    function handler(obj, patches) {
+        calls.push([obj, patches]);
+    }
+
+    People[canSymbol.for("can.onInstancePatches")](handler);
+
+    var list = new People([1,2]);
+    list.push(3);
+    list.attr("count", 8);
+    People[canSymbol.for("can.offInstancePatches")](handler);
+    list.push(4);
+    list.attr("count", 7);
+
+    QUnit.deepEqual(calls,[
+        [list,  [{type: "splice", index: 2, deleteCount: 0, insert: [3]} ] ],
+        [list, [{type: "set",    key: "count", value: 8} ] ]
+    ]);
+});
+
+QUnit.test("can.onInstanceBoundChange basics", function(){
+
+    var People = List.extend({});
+
+    var calls = [];
+    function handler(obj, patches) {
+        calls.push([obj, patches]);
+    }
+
+    People[canSymbol.for("can.onInstanceBoundChange")](handler);
+
+    var people = new People([]);
+    var bindHandler = function(){};
+    canReflect.onKeyValue(people,"length", bindHandler);
+	canReflect.offKeyValue(people,"length", bindHandler);
+
+    People[canSymbol.for("can.offInstanceBoundChange")](handler);
+	canReflect.onKeyValue(people,"length", bindHandler);
+	canReflect.offKeyValue(people,"length", bindHandler);
+
+    QUnit.deepEqual(calls,[
+        [people,  true ],
+        [people, false ]
+    ]);
 });
