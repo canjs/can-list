@@ -5,7 +5,7 @@ var bubble = require('can-map/bubble');
 var mapHelpers = require('can-map/map-helpers');
 var queues = require('can-queues');
 var canEvent = require('can-event-queue/map/map');
-var Observation = require('can-observation');
+var ObservationRecorder = require('can-observation-recorder');
 
 var CID = require('can-cid');
 var isPromise = require('can-util/js/is-promise/is-promise');
@@ -476,7 +476,7 @@ assign(List.prototype, {
 	 * ```
 	 */
 	indexOf: function (item, fromIndex) {
-		Observation.add(this, "length");
+		ObservationRecorder.add(this, "length");
 		for(var i = fromIndex || 0, len = this.length; i < len; i++) {
 			if(this.attr(i) === item) {
 				return i;
@@ -508,7 +508,7 @@ assign(List.prototype, {
 	 * ```
 	 */
 	join: function () {
-		Observation.add(this, "length");
+		ObservationRecorder.add(this, "length");
 		return [].join.apply(this, arguments);
 	},
 
@@ -570,7 +570,7 @@ assign(List.prototype, {
 	 */
 	slice: function () {
 		// tells computes to listen on length for changes.
-		Observation.add(this, "length");
+		ObservationRecorder.add(this, "length");
 		var temp = Array.prototype.slice.apply(this, arguments);
 		return new this.constructor(temp);
 	},
