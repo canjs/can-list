@@ -73,6 +73,7 @@ var List = Map.extend(
 			// `batchTrigger` direct add and remove events...
 			var index = +attr, patches;
 			// Make sure this is not nested and not an expando
+
 			if (!~(""+attr).indexOf('.') && !isNaN(index)) {
 				if(bubble.isBubbling(this, "change")) {
 					canEvent.dispatch.call(this, {
@@ -84,12 +85,12 @@ var List = Map.extend(
 					patches = [{insert: newVal, index: index, deleteCount: 0, type: "splice"}];
 					canEvent.dispatch.call(this, {type: how, patches: patches}, [newVal, index]);
 					canEvent.dispatch.call(this, 'length', [this.length]);
-					canEvent.dispatch.call(this, 'can.onPatches', [patches]);
+					//canEvent.dispatch.call(this, 'can.patches', [patches]);
 				} else if (how === 'remove') {
 					patches = [{index: index, deleteCount: oldVal.length, type: "splice"}];
 					canEvent.dispatch.call(this, {type: how, patches: patches}, [oldVal, index]);
 					canEvent.dispatch.call(this, 'length', [this.length]);
-					canEvent.dispatch.call(this, 'can.onPatches', [patches]);
+					//canEvent.dispatch.call(this, 'can.patches', [patches]);
 				} else {
 					canEvent.dispatch.call(this, how, [newVal, index]);
 				}
@@ -839,12 +840,6 @@ canReflect.assignSymbols(List.prototype,{
 	},
 	"can.onKeysRemoved":  function(handler) {
 		this[canSymbol.for("can.onKeyValue")]("remove", handler);
-	},
-	"can.onPatches": function(handler,queue){
-		this[canSymbol.for("can.onKeyValue")]("can.onPatches", handler,queue);
-	},
-	"can.offPatches": function(handler,queue) {
-		this[canSymbol.for("can.offKeyValue")]("can.onPatches", handler,queue);
 	},
 	"can.splice": function(index, deleteCount, insert){
 		this.splice.apply(this, [index, deleteCount].concat(insert));
