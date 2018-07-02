@@ -9,8 +9,6 @@ var ObservationRecorder = require('can-observation-recorder');
 
 var CID = require('can-cid');
 var canReflect = require('can-reflect');
-var isPromise = canReflect.isPromise;
-var makeArray = canReflect.toArray;
 var assign = require('can-assign');
 var types = require('can-types');
 var canSymbol = require('can-symbol');
@@ -53,11 +51,11 @@ var List = Map.extend(
 			instances = instances || [];
 			var teardownMapping;
 
-			if (isPromise(instances)) {
+			if (canReflect.isPromise(instances)) {
 				this.replace(instances);
 			} else {
 				teardownMapping = instances.length && mapHelpers.addToMap(instances, this);
-				this.push.apply(this, makeArray(instances || []));
+				this.push.apply(this, canReflect.toArray(instances || []));
 			}
 
 			if (teardownMapping) {
@@ -166,7 +164,7 @@ var List = Map.extend(
 			return canReflect.serialize(this, CIDMap);
 		},
 		splice: function (index, howMany) {
-			var args = makeArray(arguments),
+			var args = canReflect.toArray(arguments),
 				added =[],
 				i, len, listIndex,
 				allSame = args.length > 2;
@@ -224,7 +222,7 @@ var List = Map.extend(
 	getArgs = function (args) {
 		return args[0] && Array.isArray(args[0]) ?
 			args[0] :
-			makeArray(args);
+			canReflect.toArray(args);
 	};
 // Create `push`, `pop`, `shift`, and `unshift`
 canReflect.eachKey({
@@ -532,7 +530,7 @@ assign(List.prototype, {
 	 * ```
 	 */
 	reverse: function() {
-		var list = [].reverse.call(makeArray(this));
+		var list = [].reverse.call(canReflect.toArray(this));
 		return this.replace(list);
 	},
 
@@ -607,7 +605,7 @@ assign(List.prototype, {
 			if((canReflect.isObservableLike(arg) && canReflect.isListLike(arg)) || Array.isArray(arg)) {
 				// If it is list-like we want convert to a JS array then
 				// pass each item of the array to serializeNonTypes
-				var arr = (canReflect.isObservableLike(arg) && canReflect.isListLike(arg)) ? makeArray(arg) : arg;
+				var arr = (canReflect.isObservableLike(arg) && canReflect.isListLike(arg)) ? canReflect.toArray(arg) : arg;
 				canReflect.each(arr, function(innerArg) {
 					serializeNonTypes(MapType, innerArg, args);
 				});
@@ -623,7 +621,7 @@ assign(List.prototype, {
 		// as well (We know it should be list-like), then
 		// concat with our passed in args, then pass it to
 		// list constructor to make it back into a list
-		return new this.constructor(Array.prototype.concat.apply(makeArray(this), args));
+		return new this.constructor(Array.prototype.concat.apply(canReflect.toArray(this), args));
 	},
 
 	/**
@@ -723,7 +721,7 @@ assign(List.prototype, {
 	 * ```
 	 */
 	replace: function (newList) {
-		if (isPromise(newList)) {
+		if (canReflect.isPromise(newList)) {
 			if(this._promise) {
 				this._promise.__isCurrentPromise = false;
 			}
@@ -736,7 +734,7 @@ assign(List.prototype, {
 				}
 			});
 		} else {
-			this.splice.apply(this, [0, this.length].concat(makeArray(newList || [])));
+			this.splice.apply(this, [0, this.length].concat(canReflect.toArray(newList || [])));
 		}
 
 		return this;
