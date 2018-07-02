@@ -8,14 +8,13 @@ var canEvent = require('can-event-queue/map/map');
 var ObservationRecorder = require('can-observation-recorder');
 
 var CID = require('can-cid');
-var isPromise = require('can-util/js/is-promise/is-promise');
-var makeArray = require('can-util/js/make-array/make-array');
-var assign = require('can-util/js/assign/assign');
-var types = require('can-types');
-var each = require('can-util/js/each/each');
 var canReflect = require('can-reflect');
+var isPromise = canReflect.isPromise;
+var makeArray = canReflect.toArray;
+var assign = require('can-assign');
+var types = require('can-types');
 var canSymbol = require('can-symbol');
-var CIDMap = require("can-util/js/cid-map/cid-map");
+var CIDMap = require("can-cid/map/map");
 
 
 // Helpers for `observable` lists.
@@ -228,7 +227,7 @@ var List = Map.extend(
 			makeArray(args);
 	};
 // Create `push`, `pop`, `shift`, and `unshift`
-each({
+canReflect.eachKey({
 		/**
 		 * @function can-list.prototype.push push
 		 * @parent can-list.prototype
@@ -347,7 +346,7 @@ each({
 		};
 	});
 
-each({
+canReflect.eachKey({
 		/**
 		 * @function can-list.prototype.pop pop
 		 * @parent can-list.prototype
@@ -604,12 +603,12 @@ assign(List.prototype, {
 			MapType = this.constructor.Map;
 		// Go through each of the passed `arguments` and
 		// see if it is list-like, an array, or something else
-		each(arguments, function(arg) {
+		canReflect.each(arguments, function(arg) {
 			if((canReflect.isObservableLike(arg) && canReflect.isListLike(arg)) || Array.isArray(arg)) {
 				// If it is list-like we want convert to a JS array then
 				// pass each item of the array to serializeNonTypes
 				var arr = (canReflect.isObservableLike(arg) && canReflect.isListLike(arg)) ? makeArray(arg) : arg;
-				each(arr, function(innerArg) {
+				canReflect.each(arr, function(innerArg) {
 					serializeNonTypes(MapType, innerArg, args);
 				});
 			}
