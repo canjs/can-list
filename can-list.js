@@ -48,14 +48,14 @@ var List = Map.extend(
 			this.length = 0;
 			CID(this, ".map");
 			this._setupComputedProperties();
-			instances = instances || [];
+			instances = instances === undefined ? [] : canReflect.toArray(instances);
 			var teardownMapping;
 
 			if (canReflect.isPromise(instances)) {
 				this.replace(instances);
 			} else {
 				teardownMapping = instances.length && mapHelpers.addToMap(instances, this);
-				this.push.apply(this, canReflect.toArray(instances || []));
+				this.push.apply(this, instances);
 			}
 
 			if (teardownMapping) {
@@ -734,7 +734,8 @@ assign(List.prototype, {
 				}
 			});
 		} else {
-			this.splice.apply(this, [0, this.length].concat(canReflect.toArray(newList || [])));
+			newList = newList === undefined ? [] : canReflect.toArray(newList);
+			this.splice.apply(this, [0, this.length].concat(newList));
 		}
 
 		return this;
