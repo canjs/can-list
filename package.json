@@ -33,6 +33,7 @@
     "npmAlgorithm": "flat"
   },
   "dependencies": {
+    "can-assign": "^1.1.1",
     "can-cid": "^1.1.2",
     "can-construct": "^3.2.1",
     "can-event-queue": "<2.0.0",
@@ -44,7 +45,6 @@
     "can-stache-key": "^1.0.0",
     "can-symbol": "^1.4.1",
     "can-types": "^1.1.0",
-    "can-util": "^3.10.12",
     "can-compute": "^4.0.0",
     "can-queues": "<2.0.0",
     "can-map": "^4.0.0"
