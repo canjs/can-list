@@ -1,3 +1,4 @@
+"use strict";
 /* jshint -W079 */
 var namespace = require('can-namespace');
 var Map = require('can-map');
