@@ -762,6 +762,12 @@ assign(List.prototype, {
 
 		});
 		return filteredList;
+	},
+	sort: function(compareFunction) {
+		var sorting = Array.prototype.slice.call(this);
+		Array.prototype.sort.call(sorting, compareFunction);
+		this.splice.apply(this, [0,sorting.length].concat(sorting) );
+		return this;
 	}
 });
 
