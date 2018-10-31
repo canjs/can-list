@@ -594,3 +594,49 @@ QUnit.test("can.onInstanceBoundChange basics", function(){
         [people, false ]
     ]);
 });
+
+QUnit.test('list.sort a simple list', function() {
+	var myList = new List([
+		"Marshall",
+		"Austin",
+		"Hyrum"
+	]);
+
+	myList.sort();
+
+		equal(myList.length, 3);
+		equal(myList[0], "Austin");
+	equal(myList[1], "Hyrum");
+	equal(myList[2], "Marshall", "Basic list was properly sorted.");
+});
+
+QUnit.test('list.sort a list of objects', function() {
+	var objList = new List([
+		{ id: 1, name: "Marshall" },
+		{ id: 2, name: "Austin" },
+		{ id: 3, name: "Hyrum" }
+	]);
+
+	objList.sort(function(a, b) {
+		if (a.name < b.name) {
+			return -1;
+		} else if (a.name > b.name) {
+			return 1;
+		} else {
+			return 0;
+		}
+	});
+
+	equal(objList.length, 3);
+	equal(objList[0].name, "Austin");
+	equal(objList[1].name, "Hyrum");
+	equal(objList[2].name, "Marshall", "List of objects was properly sorted.");
+});
+
+QUnit.test('list.sort a list of objects without losing reference (#137)', function() {
+	var unSorted = new List([ { id: 3 }, { id: 2 }, { id: 1 } ]);
+	var sorted = unSorted.slice(0).sort(function(a, b) {
+		return a.id > b.id ? 1 : (a.id < b.id ? -1 : 0);
+	});
+	equal(unSorted[0], sorted[2], 'items should be equal');
+});
