@@ -640,3 +640,19 @@ QUnit.test('list.sort a list of objects without losing reference (#137)', functi
 	});
 	equal(unSorted[0], sorted[2], 'items should be equal');
 });
+
+QUnit.test("list receives patch events", function() {
+	QUnit.expect(2);
+	var list = new List([]);
+
+	function handler(patches) {
+		if(patches[0].index === 0 && patches[0].insert) {
+			QUnit.ok(true);
+		}
+	}
+	canReflect.onPatches(list, handler);
+
+	list.push("foo");
+	list.attr(0, "bar");
+	canReflect.offPatches(list, handler);
+});
