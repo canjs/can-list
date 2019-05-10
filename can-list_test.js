@@ -7,22 +7,22 @@ var canSymbol = require('can-symbol');
 
 QUnit.module('can-list');
 
-test('list attr changes length', function () {
+QUnit.test('list attr changes length', function(assert) {
 	var l = new List([
 		0,
 		1,
 		2
 	]);
 	l.attr(3, 3);
-	equal(l.length, 4);
+	assert.equal(l.length, 4);
 });
-test('removeAttr on list', function() {
+QUnit.test('removeAttr on list', function(assert) {
 	var l = new List([0, 1, 2]);
 	l.removeAttr(1);
-	equal(l.attr('length'), 2);
-	deepEqual(l.attr(), [0, 2]);
+	assert.equal(l.attr('length'), 2);
+	assert.deepEqual(l.attr(), [0, 2]);
 });
-test('list splice', function () {
+QUnit.test('list splice', function(assert) {
 	var l = new List([
 		0,
 		1,
@@ -31,28 +31,28 @@ test('list splice', function () {
 	]),
 		first = true;
 	l.bind('change', function (ev, attr, how, newVals, oldVals) {
-		equal(attr, '1');
+		assert.equal(attr, '1');
 		if (first) {
-			equal(how, 'remove', 'removing items');
-			equal(newVals, undefined, 'no new Vals');
+			assert.equal(how, 'remove', 'removing items');
+			assert.equal(newVals, undefined, 'no new Vals');
 		} else {
-			deepEqual(newVals, [
+			assert.deepEqual(newVals, [
 				'a',
 				'b'
 			], 'got the right newVals');
-			equal(how, 'add', 'adding items');
+			assert.equal(how, 'add', 'adding items');
 		}
 		first = false;
 	});
 	l.splice(1, 2, 'a', 'b');
-	deepEqual(l.serialize(), [
+	assert.deepEqual(l.serialize(), [
 		0,
 		'a',
 		'b',
 		3
 	], 'serialized');
 });
-test('list pop', function () {
+QUnit.test('list pop', function(assert) {
 	var l = new List([
 		0,
 		1,
@@ -60,31 +60,31 @@ test('list pop', function () {
 		3
 	]);
 	l.bind('change', function (ev, attr, how, newVals, oldVals) {
-		equal(attr, '3');
-		equal(how, 'remove');
-		equal(newVals, undefined);
-		deepEqual(oldVals, [3]);
+		assert.equal(attr, '3');
+		assert.equal(how, 'remove');
+		assert.equal(newVals, undefined);
+		assert.deepEqual(oldVals, [3]);
 	});
 	l.pop();
-	deepEqual(l.serialize(), [
+	assert.deepEqual(l.serialize(), [
 		0,
 		1,
 		2
 	]);
 });
-test('remove nested property in item of array map', function () {
+QUnit.test('remove nested property in item of array map', function(assert) {
 	var state = new List([{
 		nested: true
 	}]);
 	state.bind('change', function (ev, attr, how, newVal, old) {
-		equal(attr, '0.nested');
-		equal(how, 'remove');
-		deepEqual(old, true);
+		assert.equal(attr, '0.nested');
+		assert.equal(how, 'remove');
+		assert.deepEqual(old, true);
 	});
 	state.removeAttr('0.nested');
-	equal(undefined, state.attr('0.nested'));
+	assert.equal(undefined, state.attr('0.nested'));
 });
-test('pop unbinds', function () {
+QUnit.test('pop unbinds', function(assert) {
 	var l = new List([{
 		foo: 'bar'
 	}]);
@@ -93,21 +93,21 @@ test('pop unbinds', function () {
 	l.bind('change', function (ev, attr, how, newVal, oldVal) {
 		count++;
 		if (count === 1) {
-			equal(attr, '0.foo', 'count is set');
+			assert.equal(attr, '0.foo', 'count is set');
 		} else if (count === 2) {
-			equal(how, 'remove');
-			equal(attr, '0');
+			assert.equal(how, 'remove');
+			assert.equal(attr, '0');
 		} else {
-			ok(false, 'called too many times');
+			assert.ok(false, 'called too many times');
 		}
 	});
 
-	equal(o.attr('foo'), 'bar', "read foo property");
+	assert.equal(o.attr('foo'), 'bar', "read foo property");
 	o.attr('foo', 'car');
 	l.pop();
 	o.attr('foo', 'bad');
 });
-test('splice unbinds', function () {
+QUnit.test('splice unbinds', function(assert) {
 	var l = new List([{
 		foo: 'bar'
 	}]);
@@ -116,32 +116,32 @@ test('splice unbinds', function () {
 	l.bind('change', function (ev, attr, how, newVal, oldVal) {
 		count++;
 		if (count === 1) {
-			equal(attr, '0.foo', 'count is set');
+			assert.equal(attr, '0.foo', 'count is set');
 		} else if (count === 2) {
-			equal(how, 'remove');
-			equal(attr, '0');
+			assert.equal(how, 'remove');
+			assert.equal(attr, '0');
 		} else {
-			ok(false, 'called too many times');
+			assert.ok(false, 'called too many times');
 		}
 	});
-	equal(o.attr('foo'), 'bar');
+	assert.equal(o.attr('foo'), 'bar');
 	o.attr('foo', 'car');
 	l.splice(0, 1);
 	o.attr('foo', 'bad');
 });
-test('always gets right attr even after moving array items', function () {
+QUnit.test('always gets right attr even after moving array items', function(assert) {
 	var l = new List([{
 		foo: 'bar'
 	}]);
 	var o = l.attr(0);
 	l.unshift('A new Value');
 	l.bind('change', function (ev, attr, how) {
-		equal(attr, '1.foo');
+		assert.equal(attr, '1.foo');
 	});
 	o.attr('foo', 'led you');
 });
 
-test('Array accessor methods', 11, function () {
+QUnit.test('Array accessor methods', 11, function(assert) {
 	var l = new List([
 		'a',
 		'b',
@@ -153,12 +153,12 @@ test('Array accessor methods', 11, function () {
 			2,
 			1
 		], new List([0]));
-	ok(sliced instanceof List, 'Slice is an Observable list');
-	equal(sliced.length, 1, 'Sliced off two elements');
-	equal(sliced[0], 'c', 'Single element as expected');
-	equal(joined, 'a | b | c', 'Joined list properly');
-	ok(concatenated instanceof List, 'Concatenated is an Observable list');
-	deepEqual(concatenated.serialize(), [
+	assert.ok(sliced instanceof List, 'Slice is an Observable list');
+	assert.equal(sliced.length, 1, 'Sliced off two elements');
+	assert.equal(sliced[0], 'c', 'Single element as expected');
+	assert.equal(joined, 'a | b | c', 'Joined list properly');
+	assert.ok(concatenated instanceof List, 'Concatenated is an Observable list');
+	assert.deepEqual(concatenated.serialize(), [
 		'a',
 		'b',
 		'c',
@@ -167,17 +167,17 @@ test('Array accessor methods', 11, function () {
 		0
 	], 'List concatenated properly');
 	l.forEach(function (letter, index) {
-		ok(true, 'Iteration');
+		assert.ok(true, 'Iteration');
 		if (index === 0) {
-			equal(letter, 'a', 'First letter right');
+			assert.equal(letter, 'a', 'First letter right');
 		}
 		if (index === 2) {
-			equal(letter, 'c', 'Last letter right');
+			assert.equal(letter, 'c', 'Last letter right');
 		}
 	});
 });
 
-test('Concatenated list items Equal original', function() {
+QUnit.test('Concatenated list items Equal original', function(assert) {
 	var l = new List([
 		{ firstProp: "Some data" },
 		{ secondProp: "Next data" }
@@ -187,12 +187,12 @@ test('Concatenated list items Equal original', function() {
 		{ foo: "Bar" }
 	]);
 
-	ok(l[0] === concatenated[0], "They are Equal");
-	ok(l[1] === concatenated[1], "They are Equal");
+	assert.ok(l[0] === concatenated[0], "They are Equal");
+	assert.ok(l[1] === concatenated[1], "They are Equal");
 
 });
 
-test('Lists with maps concatenate properly', function() {
+QUnit.test('Lists with maps concatenate properly', function(assert) {
 	var Person = Map.extend();
 	var People = List.extend({
 		Map: Person
@@ -213,74 +213,74 @@ test('Lists with maps concatenate properly', function() {
 
 	people = people.concat([me, animal, specialPeople], specialPeople, [1, 2], 3);
 
-	ok(people.attr('length') === 8, "List length is right");
-	ok(people[0] === me, "Map in list === vars created before concat");
-	ok(people[1] instanceof Person, "Animal got serialized to Person");
+	assert.ok(people.attr('length') === 8, "List length is right");
+	assert.ok(people[0] === me, "Map in list === vars created before concat");
+	assert.ok(people[1] instanceof Person, "Animal got serialized to Person");
 });
 
-test('splice removes items in IE (#562)', function () {
+QUnit.test('splice removes items in IE (#562)', function(assert) {
 	var l = new List(['a']);
 	l.splice(0, 1);
-	ok(!l.attr(0), 'all props are removed');
+	assert.ok(!l.attr(0), 'all props are removed');
 });
 
-test('reverse triggers add/remove events (#851)', function() {
-	expect(6);
+QUnit.test('reverse triggers add/remove events (#851)', function(assert) {
+	assert.expect(6);
 	var l = new List([1,2,3]);
 
 	l.bind('change', function() {
-		ok(true, 'change should be called');
+		assert.ok(true, 'change should be called');
 	});
-	l.bind('set', function() { ok(false, 'set should not be called'); });
-	l.bind('add', function() { ok(true, 'add called'); });
-	l.bind('remove', function() { ok(true, 'remove called'); });
-	l.bind('length', function() { ok(true, 'length should be called'); });
+	l.bind('set', function() { assert.ok(false, 'set should not be called'); });
+	l.bind('add', function() { assert.ok(true, 'add called'); });
+	l.bind('remove', function() { assert.ok(true, 'remove called'); });
+	l.bind('length', function() { assert.ok(true, 'length should be called'); });
 
 	l.reverse();
 });
 
-test('filter', function(){
+QUnit.test('filter', function(assert) {
 	var l = new List([{id: 1, name: "John"}, {id: 2, name: "Mary"}]);
 
 	var filtered = l.filter(function(item){
 		return item.name === "Mary";
 	});
 
-	notEqual(filtered._cid, l._cid, "not same object");
-	equal(filtered.length, 1, "one item");
-	equal(filtered[0].name, "Mary", "filter works");
+	assert.notEqual(filtered._cid, l._cid, "not same object");
+	assert.equal(filtered.length, 1, "one item");
+	assert.equal(filtered[0].name, "Mary", "filter works");
 });
 
 
-test('removing expandos on lists', function(){
+QUnit.test('removing expandos on lists', function(assert) {
 	var list = new List(["a","b"]);
 
 	list.removeAttr("foo");
 
-	equal(list.length, 2);
+	assert.equal(list.length, 2);
 });
 
-test('No Add Events if List Splice adds the same items that it is removing. (#1277, #1399)', function() {
+QUnit.test('No Add Events if List Splice adds the same items that it is removing. (#1277, #1399)', function(assert) {
 	var list = new List(["a","b"]);
 
 	list.bind('add', function() {
-		ok(false, 'Add callback should not be called.');
+		assert.ok(false, 'Add callback should not be called.');
 	});
 
 	list.bind('remove', function() {
-		ok(false, 'Remove callback should not be called.');
+		assert.ok(false, 'Remove callback should not be called.');
 	});
 
   var result = list.splice(0, 2, "a", "b");
 
-  deepEqual(result, ["a", "b"]);
+  assert.deepEqual(result, ["a", "b"]);
 });
 
-test("add event always returns an array as the value (#998)", function() {
+QUnit.test("add event always returns an array as the value (#998)", function(assert) {
 	var list = new List([]),
 		msg;
 	list.bind("add", function(ev, newElements, index) {
-		deepEqual(newElements, [4], msg);
+		assert.deepEqual(newElements, [4], msg);
 	});
 	msg = "works on push";
 	list.push(4);
@@ -292,67 +292,67 @@ test("add event always returns an array as the value (#998)", function() {
 	list.replace([4]);
 });
 
-test("Setting with .attr() out of bounds of length triggers add event with leading undefineds", function() {
+QUnit.test("Setting with .attr() out of bounds of length triggers add event with leading undefineds", function(assert) {
 	var list = new List([1]);
 	list.bind("add", function(ev, newElements, index) {
-		deepEqual(newElements, [undefined, undefined, 4],
+		assert.deepEqual(newElements, [undefined, undefined, 4],
 				  "Leading undefineds are included");
-		equal(index, 1, "Index takes into account the leading undefineds from a .attr()");
+		assert.equal(index, 1, "Index takes into account the leading undefineds from a .attr()");
 	});
 	list.attr(3, 4);
 });
 
-test("No events should fire if removals happened on empty arrays", function() {
+QUnit.test("No events should fire if removals happened on empty arrays", function(assert) {
 	var list = new List([]),
 		msg;
 	list.bind("remove", function(ev, removed, index) {
-		ok(false, msg);
+		assert.ok(false, msg);
 	});
 	msg = "works on pop";
 	list.pop();
 	msg = "works on shift";
 	list.shift();
-	ok(true, "No events were fired.");
+	assert.ok(true, "No events were fired.");
 });
 
-test('setting an index out of bounds does not create an array', function() {
-	expect(1);
+QUnit.test('setting an index out of bounds does not create an array', function(assert) {
+	assert.expect(1);
 	var l = new List();
 
 	l.attr('1', 'foo');
-	equal(l.attr('1'), 'foo');
+	assert.equal(l.attr('1'), 'foo');
 });
 
-test('splice with similar but less items works (#1606)', function() {
+QUnit.test('splice with similar but less items works (#1606)', function(assert) {
 	var list = new List([ 'aa', 'bb', 'cc']);
 
 	list.splice(0, list.length, 'aa', 'cc', 'dd');
-	deepEqual(list.attr(), ['aa', 'cc', 'dd']);
+	assert.deepEqual(list.attr(), ['aa', 'cc', 'dd']);
 
 	list.splice(0, list.length, 'aa', 'cc');
-	deepEqual(list.attr(), ['aa', 'cc']);
+	assert.deepEqual(list.attr(), ['aa', 'cc']);
 });
 
-test('filter returns same list type (#1744)', function() {
+QUnit.test('filter returns same list type (#1744)', function(assert) {
 	var ParentList = List.extend();
 	var ChildList = ParentList.extend();
 
 	var children = new ChildList([1,2,3]);
 
-	ok(children.filter(function() {}) instanceof ChildList);
+	assert.ok(children.filter(function() {}) instanceof ChildList);
 });
 
-test('reverse returns the same list instance (#1744)', function() {
+QUnit.test('reverse returns the same list instance (#1744)', function(assert) {
 	var ParentList = List.extend();
 	var ChildList = ParentList.extend();
 
 	var children = new ChildList([1,2,3]);
-	ok(children.reverse() === children);
+	assert.ok(children.reverse() === children);
 });
 
 
-test("slice and join are observable by a compute (#1884)", function(){
-	expect(2);
+QUnit.test("slice and join are observable by a compute (#1884)", function(assert) {
+	assert.expect(2);
 
 	var list = new List([1,2,3]);
 
@@ -360,14 +360,14 @@ test("slice and join are observable by a compute (#1884)", function(){
 		return list.slice(0,1);
 	});
 	canReflect.onValue(sliced, function(newVal){
-		deepEqual(newVal.attr(), [2], "got a new List");
+		assert.deepEqual(newVal.attr(), [2], "got a new List");
 	});
 
 	var joined = new Observation(function(){
 		return list.join(",");
 	});
 	canReflect.onValue(joined, function(newVal){
-		equal(newVal, "2,3", "joined is observable");
+		assert.equal(newVal, "2,3", "joined is observable");
 	});
 
 
@@ -377,19 +377,19 @@ test("slice and join are observable by a compute (#1884)", function(){
 });
 
 
-test("list is always updated with the last promise passed to replace (#2136)", function(){
+QUnit.test("list is always updated with the last promise passed to replace (#2136)", function(assert) {
 
 	var list = new List();
 
-	stop();
+	var done = assert.async();
 
 	list.replace( new Promise( function( resolve ) {
 		setTimeout( function(){
 			resolve([ "A" ]);
 
 			setTimeout(function(){
-				equal(list.attr(0), "B", "list set to last promise's value");
-				start();
+				assert.equal(list.attr(0), "B", "list set to last promise's value");
+				done();
 			},10);
 
 		}, 20 );
@@ -402,7 +402,7 @@ test("list is always updated with the last promise passed to replace (#2136)", f
 	}));
 });
 
-test('forEach callback', function () {
+QUnit.test('forEach callback', function(assert) {
 	var list = new List([]),
 		counter = 0;
 	list.attr(9, 'foo');
@@ -410,10 +410,10 @@ test('forEach callback', function () {
 	list.forEach(function (element, index, list) {
 		counter++;
 	});
-	equal(counter, 1, 'Should not be invoked for uninitialized attr keys');
+	assert.equal(counter, 1, 'Should not be invoked for uninitialized attr keys');
 });
 
-test('filter with context', function(){
+QUnit.test('filter with context', function(assert) {
 	var l = new List([{id: 1}]);
 	var context = {};
 	var contextWasCorrect = false;
@@ -423,10 +423,10 @@ test('filter with context', function(){
 		return true;
 	}, context);
 
-	equal(contextWasCorrect, true, "context was correctly passed");
+	assert.equal(contextWasCorrect, true, "context was correctly passed");
 });
 
-test('map with context', function(){
+QUnit.test('map with context', function(assert) {
 	var l = new List([{id: 1}]);
 	var context = {};
 	var contextWasCorrect = false;
@@ -436,23 +436,23 @@ test('map with context', function(){
 		return true;
 	}, context);
 
-	equal(contextWasCorrect, true, "context was correctly passed");
+	assert.equal(contextWasCorrect, true, "context was correctly passed");
 });
 
-test("works with can-reflect", 11, function(){
+QUnit.test("works with can-reflect", 11, function(assert) {
 	var a = new Map({ foo: 4 });
 	var b = new List([ "foo", "bar" ]);
 
-	QUnit.equal( canReflect.getKeyValue(b, "0"), "foo", "unbound value");
+	assert.equal( canReflect.getKeyValue(b, "0"), "foo", "unbound value");
 
 	var handler = function(newValue){
-		QUnit.equal(newValue, "quux", "observed new value");
+		assert.equal(newValue, "quux", "observed new value");
 	};
-	QUnit.ok(!canReflect.isValueLike(b), "isValueLike is false");
-	QUnit.ok(canReflect.isMapLike(b), "isMapLike is true");
-	QUnit.ok(canReflect.isListLike(b), "isListLike is false");
+	assert.ok(!canReflect.isValueLike(b), "isValueLike is false");
+	assert.ok(canReflect.isMapLike(b), "isMapLike is true");
+	assert.ok(canReflect.isListLike(b), "isListLike is false");
 
-	QUnit.ok( !canReflect.keyHasDependencies(b, "length"), "keyHasDependencies -- false");
+	assert.ok( !canReflect.keyHasDependencies(b, "length"), "keyHasDependencies -- false");
 
 	b._computedAttrs["length"] = {  // jshint ignore:line
 		compute: new Observation(function() {
@@ -460,37 +460,37 @@ test("works with can-reflect", 11, function(){
 		}, null)
 	};
 	b._computedAttrs["length"].compute.start();  // jshint ignore:line
-	QUnit.ok( canReflect.keyHasDependencies(b, "length"), "keyHasDependencies -- true");
+	assert.ok( canReflect.keyHasDependencies(b, "length"), "keyHasDependencies -- true");
 
 	canReflect.onKeysAdded(b, handler);
 	canReflect.onKeysRemoved(b, handler);
 	var handlers = b[canSymbol.for("can.meta")].handlers;
 
 
-	QUnit.ok(handlers.get(["add"]).length, "add handler added");
-	QUnit.ok(handlers.get(["remove"]).length, "remove handler added");
+	assert.ok(handlers.get(["add"]).length, "add handler added");
+	assert.ok(handlers.get(["remove"]).length, "remove handler added");
 
 	b.push("quux");
 
-	QUnit.equal( canReflect.getKeyValue(b, "length"), "4", "bound value");
+	assert.equal( canReflect.getKeyValue(b, "length"), "4", "bound value");
 	// sanity checks to ensure that handler doesn't get called again.
 	b.pop();
 
 });
 
-QUnit.test("can-reflect setKeyValue", function(){
+QUnit.test("can-reflect setKeyValue", function(assert) {
 	var a = new Map({ "a": "b" });
 
 	canReflect.setKeyValue(a, "a", "c");
-	QUnit.equal(a.attr("a"), "c", "setKeyValue");
+	assert.equal(a.attr("a"), "c", "setKeyValue");
 });
 
-QUnit.test("can-reflect getKeyDependencies", function() {
+QUnit.test("can-reflect getKeyDependencies", function(assert) {
 	var a = new Map({ foo: 4 });
 	var b = new List([ "foo", "bar" ]);
 
 
-	ok(!canReflect.getKeyDependencies(b, "length"), "No dependencies before binding");
+	assert.ok(!canReflect.getKeyDependencies(b, "length"), "No dependencies before binding");
 
 	b._computedAttrs.length = {
 		compute: new Observation(function() {
@@ -499,21 +499,21 @@ QUnit.test("can-reflect getKeyDependencies", function() {
 	};
 	b._computedAttrs.length.compute.start();
 
-	ok(canReflect.getKeyDependencies(b, "length"), "dependencies exist");
-	ok(canReflect.getKeyDependencies(b, "length").valueDependencies.has(b._computedAttrs.length.compute), "dependencies returned");
+	assert.ok(canReflect.getKeyDependencies(b, "length"), "dependencies exist");
+	assert.ok(canReflect.getKeyDependencies(b, "length").valueDependencies.has(b._computedAttrs.length.compute), "dependencies returned");
 
 });
 
-QUnit.test("registered symbols", function() {
+QUnit.test("registered symbols", function(assert) {
 	var a = new Map({ "a": "a" });
 
-	ok(a[canSymbol.for("can.isMapLike")], "can.isMapLike");
-	equal(a[canSymbol.for("can.getKeyValue")]("a"), "a", "can.getKeyValue");
+	assert.ok(a[canSymbol.for("can.isMapLike")], "can.isMapLike");
+	assert.equal(a[canSymbol.for("can.getKeyValue")]("a"), "a", "can.getKeyValue");
 	a[canSymbol.for("can.setKeyValue")]("a", "b");
-	equal(a.attr("a"), "b", "can.setKeyValue");
+	assert.equal(a.attr("a"), "b", "can.setKeyValue");
 
 	function handler(val) {
-		equal(val, "c", "can.onKeyValue");
+		assert.equal(val, "c", "can.onKeyValue");
 	}
 
 	a[canSymbol.for("can.onKeyValue")]("a", handler);
@@ -523,7 +523,7 @@ QUnit.test("registered symbols", function() {
 	a.attr("a", "d"); // doesn't trigger handler
 });
 
-QUnit.test("onPatches", function () {
+QUnit.test("onPatches", function(assert) {
 	var list = new List([ "a", "b" ]);
 	var PATCHES = [
 		[ { deleteCount: 2, index: 0, type: "splice" } ],
@@ -532,7 +532,7 @@ QUnit.test("onPatches", function () {
 
 	var handlerCalls = 0;
 	var handler = function (patches) {
-		QUnit.deepEqual(patches, PATCHES[handlerCalls], "patches looked right for " + handlerCalls);
+		assert.deepEqual(patches, PATCHES[handlerCalls], "patches looked right for " + handlerCalls);
 		handlerCalls++;
 	};
 
@@ -546,7 +546,7 @@ QUnit.test("onPatches", function () {
 });
 
 
-QUnit.test("can.onInstancePatches basics", function(){
+QUnit.test("can.onInstancePatches basics", function(assert) {
     var People = List.extend({});
 
     var calls = [];
@@ -563,13 +563,13 @@ QUnit.test("can.onInstancePatches basics", function(){
     list.push(4);
     list.attr("count", 7);
 
-    QUnit.deepEqual(calls,[
+    assert.deepEqual(calls,[
         [list,  [{type: "splice", index: 2, deleteCount: 0, insert: [3]} ] ],
         [list, [{type: "set",    key: "count", value: 8} ] ]
     ]);
 });
 
-QUnit.test("can.onInstanceBoundChange basics", function(){
+QUnit.test("can.onInstanceBoundChange basics", function(assert) {
 
     var People = List.extend({});
 
@@ -589,13 +589,13 @@ QUnit.test("can.onInstanceBoundChange basics", function(){
 	canReflect.onKeyValue(people,"length", bindHandler);
 	canReflect.offKeyValue(people,"length", bindHandler);
 
-    QUnit.deepEqual(calls,[
+    assert.deepEqual(calls,[
         [people,  true ],
         [people, false ]
     ]);
 });
 
-QUnit.test('list.sort a simple list', function() {
+QUnit.test('list.sort a simple list', function(assert) {
 	var myList = new List([
 		"Marshall",
 		"Austin",
@@ -604,13 +604,13 @@ QUnit.test('list.sort a simple list', function() {
 
 	myList.sort();
 
-		equal(myList.length, 3);
-		equal(myList[0], "Austin");
-	equal(myList[1], "Hyrum");
-	equal(myList[2], "Marshall", "Basic list was properly sorted.");
+		assert.equal(myList.length, 3);
+		assert.equal(myList[0], "Austin");
+	assert.equal(myList[1], "Hyrum");
+	assert.equal(myList[2], "Marshall", "Basic list was properly sorted.");
 });
 
-QUnit.test('list.sort a list of objects', function() {
+QUnit.test('list.sort a list of objects', function(assert) {
 	var objList = new List([
 		{ id: 1, name: "Marshall" },
 		{ id: 2, name: "Austin" },
@@ -627,16 +627,16 @@ QUnit.test('list.sort a list of objects', function() {
 		}
 	});
 
-	equal(objList.length, 3);
-	equal(objList[0].name, "Austin");
-	equal(objList[1].name, "Hyrum");
-	equal(objList[2].name, "Marshall", "List of objects was properly sorted.");
+	assert.equal(objList.length, 3);
+	assert.equal(objList[0].name, "Austin");
+	assert.equal(objList[1].name, "Hyrum");
+	assert.equal(objList[2].name, "Marshall", "List of objects was properly sorted.");
 });
 
-QUnit.test('list.sort a list of objects without losing reference (#137)', function() {
+QUnit.test('list.sort a list of objects without losing reference (#137)', function(assert) {
 	var unSorted = new List([ { id: 3 }, { id: 2 }, { id: 1 } ]);
 	var sorted = unSorted.slice(0).sort(function(a, b) {
 		return a.id > b.id ? 1 : (a.id < b.id ? -1 : 0);
 	});
-	equal(unSorted[0], sorted[2], 'items should be equal');
+	assert.equal(unSorted[0], sorted[2], 'items should be equal');
 });
