@@ -141,7 +141,8 @@ QUnit.test('always gets right attr even after moving array items', function(asse
 	o.attr('foo', 'led you');
 });
 
-QUnit.test('Array accessor methods', 11, function(assert) {
+QUnit.test('Array accessor methods', function(assert) {
+	assert.expect(11);
 	var l = new List([
 		'a',
 		'b',
@@ -439,7 +440,8 @@ QUnit.test('map with context', function(assert) {
 	assert.equal(contextWasCorrect, true, "context was correctly passed");
 });
 
-QUnit.test("works with can-reflect", 11, function(assert) {
+QUnit.test("works with can-reflect", function(assert) {
+	assert.expect(11);
 	var a = new Map({ foo: 4 });
 	var b = new List([ "foo", "bar" ]);
 
