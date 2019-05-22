@@ -15,7 +15,6 @@ var types = require('can-types');
 var canSymbol = require('can-symbol');
 var CIDMap = require("can-cid/map/map");
 
-
 // Helpers for `observable` lists.
 var splice = [].splice,
 	// test if splice works correctly
@@ -83,12 +82,12 @@ var List = Map.extend(
 					patches = [{insert: newVal, index: index, deleteCount: 0, type: "splice"}];
 					canEvent.dispatch.call(this, {type: how, patches: patches}, [newVal, index]);
 					canEvent.dispatch.call(this, 'length', [this.length]);
-					//canEvent.dispatch.call(this, 'can.patches', [patches]);
+					canEvent.dispatch.call(this, 'can.patches', [patches]);
 				} else if (how === 'remove') {
 					patches = [{index: index, deleteCount: oldVal.length, type: "splice"}];
 					canEvent.dispatch.call(this, {type: how, patches: patches}, [oldVal, index]);
 					canEvent.dispatch.call(this, 'length', [this.length]);
-					//canEvent.dispatch.call(this, 'can.patches', [patches]);
+					canEvent.dispatch.call(this, 'can.patches', [patches]);
 				} else {
 					canEvent.dispatch.call(this, how, [newVal, index]);
 				}
@@ -97,6 +96,15 @@ var List = Map.extend(
 				Map.prototype._triggerChange.apply(this, arguments);
 			}
 			queues.batch.stop();
+		},
+		__get: function(prop){
+			prop = isNaN(+prop) || (prop % 1) ? prop : +prop;
+			if(typeof prop === "number") {
+				ObservationRecorder.add(this, "can.patches");
+				return this.___get( "" + prop );
+			} else {
+				return Map.prototype.__get.call(this, prop);
+			}
 		},
 		___get: function (attr) {
 			if (attr) {
@@ -848,6 +856,12 @@ canReflect.assignSymbols(List.prototype,{
 	},
 	"can.splice": function(index, deleteCount, insert){
 		this.splice.apply(this, [index, deleteCount].concat(insert));
+	},
+	"can.onPatches": function(handler,queue){
+		this[canSymbol.for("can.onKeyValue")]("can.patches", handler,queue);
+	},
+	"can.offPatches": function(handler,queue) {
+		this[canSymbol.for("can.offKeyValue")]("can.patches", handler,queue);
 	}
 });
 
