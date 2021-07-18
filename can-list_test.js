@@ -253,12 +253,17 @@ QUnit.test('filter', function(assert) {
 });
 
 
-QUnit.test('removing expandos on lists', function(assert) {
+QUnit.test('expandos on lists', function(assert) {
 	var list = new List(["a","b"]);
+
+	list.attr("foo","bar");
+	assert.equal(list.attr("foo"), "bar", "can add an attr");
 
 	list.removeAttr("foo");
 
 	assert.equal(list.length, 2);
+
+	list.attr("foo", undefined); // creating a property 
 });
 
 QUnit.test('No Add Events if List Splice adds the same items that it is removing. (#1277, #1399)', function(assert) {

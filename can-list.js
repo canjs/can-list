@@ -46,6 +46,8 @@ var List = Map.extend(
 	{
 		setup: function (instances, options) {
 			this.length = 0;
+			// create this for expando properties
+			this._data = {};
 			CID(this, ".map");
 			this._setupComputedProperties();
 			instances = instances === undefined ? [] : canReflect.toArray(instances);
